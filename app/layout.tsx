@@ -20,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${nunito.className} bg-[#FFF7F0]`}>
+      <body className={`${nunito.className} bg-[#FFF7F0] antialiased`}>
         {children}
       </body>
     </html>

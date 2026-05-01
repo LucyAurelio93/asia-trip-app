@@ -30,9 +30,9 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-[#FFF7F0] pb-28 text-[#3f2518]">
+    <main className="mx-auto min-h-[100dvh] w-full max-w-[420px] overflow-hidden bg-[#FFF7F0] pb-28 text-[#3f2518]">
       {/* HEADER */}
-      <header className="relative overflow-hidden bg-[#FFF7F0]">
+      <header className="relative overflow-hidden bg-[#FFF7F0] pt-[env(safe-area-inset-top)]">
         <div className="relative h-[300px] w-full overflow-hidden">
           <Image
             src="/cats-guide.png"
