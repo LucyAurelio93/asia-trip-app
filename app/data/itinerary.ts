@@ -9,7 +9,8 @@ export type ActivityIcon =
   | "transport"
   | "street"
   | "park"
-  | "cafe";
+  | "cafe"
+  | "hotel";
 
 export type ActivityMap = {
   lat: number;
@@ -45,19 +46,14 @@ export const itinerary: ItineraryDay[] = [
   date: "14 may",
   activities: [
     {
-      time: "10:00",
-      title: "Llegada + hotel",
-      description: "Dejar maletas en Toyoko Inn Seoul Yeongdeungpo y reordenarse.",
-      duration: "30 min",
-      transport: "Aeropuerto → hotel",
+      time: "Hotel",
+      title: "Toyoko Inn Seoul Yeongdeungpo",
+      description: "Alojamiento base del día",
       tag: "Libre",
       image: "/places/street.jpg",
-      icon: "transport",
-      map: {
-        lat: 37.5189,
-        lng: 126.9071,
-      },
-      mapQuery: "Toyoko Inn Seoul Yeongdeungpo",
+      icon: "hotel",
+      map: { lat: 37.5159, lng: 126.9077 },
+      mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
     },
     {
       time: "11:20",
@@ -133,6 +129,16 @@ export const itinerary: ItineraryDay[] = [
   city: "Seúl",
   date: "15 may",
   activities: [
+    {
+      time: "Hotel",
+      title: "Toyoko Inn Seoul Yeongdeungpo",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      map: { lat: 37.5159, lng: 126.9077 },
+      mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
+    },
     {
       time: "10:10",
       title: "Sungnyemun Gate",
@@ -233,6 +239,16 @@ export const itinerary: ItineraryDay[] = [
   date: "16 may",
   activities: [
     {
+      time: "Hotel",
+      title: "Toyoko Inn Seoul Yeongdeungpo",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      map: { lat: 37.5159, lng: 126.9077 },
+      mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
+    },
+    {
       time: "09:50",
       title: "National Museum of Korea",
       description: "Gran museo de historia, arte y patrimonio coreano.",
@@ -318,6 +334,16 @@ export const itinerary: ItineraryDay[] = [
   city: "Seúl",
   date: "17 may",
   activities: [
+    {
+      time: "Hotel",
+      title: "Toyoko Inn Seoul Yeongdeungpo",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      map: { lat: 37.5159, lng: 126.9077 },
+      mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
+    },
     {
       time: "10:40",
       title: "Seoul Sky",
@@ -405,6 +431,16 @@ export const itinerary: ItineraryDay[] = [
   date: "18 may",
   activities: [
     {
+      time: "Hotel",
+      title: "Toyoko Inn Seoul Yeongdeungpo",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      map: { lat: 37.5159, lng: 126.9077 },
+      mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
+    },
+    {
       time: "10:10",
       title: "Dongdaemun / DDP",
       description: "Arquitectura futurista y paseo urbano moderno.",
@@ -491,6 +527,15 @@ export const itinerary: ItineraryDay[] = [
   date: "19 may",
   activities: [
     {
+      time: "Hotel",
+      title: "Toyoko Inn Busan Haeundae 2",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Toyoko Inn Busan Haeundae 2",
+    },
+    {
       time: "08:00",
       title: "SRT Seúl → Busan",
       description: "Traslado principal del día en tren de alta velocidad.",
@@ -560,6 +605,15 @@ export const itinerary: ItineraryDay[] = [
   city: "Busan",
   date: "20 may",
   activities: [
+    {
+      time: "Hotel",
+      title: "Toyoko Inn Busan Haeundae 2",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Toyoko Inn Busan Haeundae 2",
+    },
     {
       time: "09:30",
       title: "Haeundae Beach",
@@ -634,6 +688,15 @@ export const itinerary: ItineraryDay[] = [
   date: "21 may",
   activities: [
     {
+      time: "Hotel",
+      title: "Toyoko Inn Busan Haeundae 2",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Toyoko Inn Busan Haeundae 2",
+    },
+    {
       time: "09:20",
       title: "Haedong Yonggungsa",
       description: "Templo costero entre escaleras, linternas y mar.",
@@ -703,6 +766,15 @@ export const itinerary: ItineraryDay[] = [
   city: "Fukuoka",
   date: "22 may",
   activities: [
+    {
+      time: "Hotel",
+      title: "Fukuoka Toei Hotel",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Fukuoka Toei Hotel",
+    },
     {
       time: "10:15",
       title: "Yanagibashi Rengo Market",
@@ -829,6 +901,15 @@ export const itinerary: ItineraryDay[] = [
   date: "23 may",
   activities: [
     {
+      time: "Hotel",
+      title: "Fukuoka Toei Hotel",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Fukuoka Toei Hotel",
+    },
+    {
       time: "09:10",
       title: "Dazaifu Tenmangu",
       description: "Santuario clásico con eje peatonal, puentes y estanques.",
@@ -941,6 +1022,15 @@ export const itinerary: ItineraryDay[] = [
   date: "24 may",
   activities: [
     {
+      time: "Hotel",
+      title: "Valia Hotel Bangkok",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Valia Hotel Bangkok",
+    },
+    {
       time: "08:30",
       title: "Traslado al aeropuerto de Fukuoka",
       description: "Salida al aeropuerto con margen para vuelo internacional.",
@@ -985,6 +1075,15 @@ export const itinerary: ItineraryDay[] = [
   city: "Bangkok",
   date: "25 may",
   activities: [
+    {
+      time: "Hotel",
+      title: "Valia Hotel Bangkok",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Valia Hotel Bangkok",
+    },
     {
       time: "08:30",
       title: "Grand Palace + Wat Phra Kaew",
@@ -1071,6 +1170,15 @@ export const itinerary: ItineraryDay[] = [
   city: "Bangkok",
   date: "26 may",
   activities: [
+    {
+      time: "Hotel",
+      title: "Valia Hotel Bangkok",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Valia Hotel Bangkok",
+    },
     {
       time: "09:15",
       title: "Talat Noi",
@@ -1183,6 +1291,15 @@ export const itinerary: ItineraryDay[] = [
   city: "Bangkok",
   date: "27 may",
   activities: [
+    {
+      time: "Hotel",
+      title: "Valia Hotel Bangkok",
+      description: "Alojamiento base del día",
+      tag: "Libre",
+      image: "/places/street.jpg",
+      icon: "hotel",
+      mapQuery: "Valia Hotel Bangkok",
+    },
     {
       time: "07:00",
       title: "Bangkok → Ayutthaya",

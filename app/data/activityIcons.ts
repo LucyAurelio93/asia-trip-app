@@ -17,4 +17,5 @@ export const activityIconMap: Record<
   transport: { emoji: "🚆", color: "#10B981", label: "Transporte" },
   street: { emoji: "🏙️", color: "#64748B", label: "Barrio" },
   park: { emoji: "🌿", color: "#22C55E", label: "Parque" },
+  hotel: { emoji: "🏨", color: "#94A3B8", label: "Hotel" },
 };
