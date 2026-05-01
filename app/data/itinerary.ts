@@ -533,6 +533,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 35.1596, lng: 129.1603 },
       mapQuery: "Toyoko Inn Busan Haeundae 2",
     },
     {
@@ -612,6 +613,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 35.1596, lng: 129.1603 },
       mapQuery: "Toyoko Inn Busan Haeundae 2",
     },
     {
@@ -694,6 +696,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 35.1596, lng: 129.1603 },
       mapQuery: "Toyoko Inn Busan Haeundae 2",
     },
     {
@@ -773,6 +776,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 33.5815, lng: 130.4043 },
       mapQuery: "Fukuoka Toei Hotel",
     },
     {
@@ -907,6 +911,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 33.5815, lng: 130.4043 },
       mapQuery: "Fukuoka Toei Hotel",
     },
     {
@@ -1028,6 +1033,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 13.721168, lng: 100.56556 },
       mapQuery: "Valia Hotel Bangkok",
     },
     {
@@ -1082,6 +1088,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 13.721168, lng: 100.56556 },
       mapQuery: "Valia Hotel Bangkok",
     },
     {
@@ -1177,6 +1184,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 13.721168, lng: 100.56556 },
       mapQuery: "Valia Hotel Bangkok",
     },
     {
@@ -1298,6 +1306,7 @@ export const itinerary: ItineraryDay[] = [
       tag: "Libre",
       image: "/places/street.jpg",
       icon: "hotel",
+      map: { lat: 13.721168, lng: 100.56556 },
       mapQuery: "Valia Hotel Bangkok",
     },
     {
