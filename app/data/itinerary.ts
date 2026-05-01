@@ -78,7 +78,7 @@ export const itinerary: ItineraryDay[] = [
       title: "Tongin Market",
       description: "Mercado tradicional con sistema de fichas.",
       duration: "1 h",
-      tag: "Comida",
+      tag: "Recomendado",
       image: "/places/market.jpg",
       icon: "market",
       map: {
@@ -140,6 +140,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "25 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 37.5585,
         lng: 126.9753,
@@ -152,6 +153,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 50",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "market",
       map: {
         lat: 37.5597,
         lng: 126.9770,
@@ -164,6 +166,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "35 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 37.5663,
         lng: 126.9784,
@@ -176,6 +179,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "30 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 37.5636,
         lng: 126.9877,
@@ -188,6 +192,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "street",
       map: {
         lat: 37.5600,
         lng: 126.9850,
@@ -200,6 +205,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "30 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 37.5559,
         lng: 126.9830,
@@ -212,6 +218,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 37.5512,
         lng: 126.9882,
@@ -232,6 +239,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h 10",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "museum",
       map: {
         lat: 37.5244,
         lng: 126.9803,
@@ -244,6 +252,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "20 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 37.5260,
         lng: 126.9780,
@@ -256,6 +265,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Libre",
       image: "/places/market.jpg",
+      icon: "food",
       map: {
         lat: 37.5178,
         lng: 126.9746,
@@ -268,6 +278,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h 15",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "museum",
       map: {
         lat: 37.5382,
         lng: 127.0047,
@@ -280,6 +291,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h 30",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 37.5729,
         lng: 126.9820,
@@ -292,6 +304,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 37.5703,
         lng: 126.9830,
@@ -312,6 +325,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Recomendado",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 37.5125,
         lng: 127.1025,
@@ -324,6 +338,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "25 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 37.5112,
         lng: 127.0982,
@@ -336,6 +351,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "35 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 37.5146,
         lng: 127.0574,
@@ -348,6 +364,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Libre",
       image: "/places/market.jpg",
+      icon: "street",
       map: {
         lat: 37.5127,
         lng: 127.0580,
@@ -360,6 +377,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "temple",
       map: {
         lat: 37.5748,
         lng: 126.9820,
@@ -372,6 +390,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 37.5729,
         lng: 126.9830,
@@ -392,6 +411,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 10",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 37.5665,
         lng: 127.0092,
@@ -404,6 +424,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "50 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 37.5802,
         lng: 127.0086,
@@ -416,6 +437,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "25 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "view",
       map: {
         lat: 37.5790,
         lng: 127.0074,
@@ -428,6 +450,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 10",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "market",
       map: {
         lat: 37.5700,
         lng: 127.0007,
@@ -440,6 +463,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "3 h",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 37.5703,
         lng: 126.9830,
@@ -452,6 +476,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h",
       tag: "Recomendado",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 37.5703,
         lng: 126.9830,
@@ -473,6 +498,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "SRT",
       tag: "Reservar",
       image: "/places/street.jpg",
+      icon: "transport",
     },
     {
       time: "13:00",
@@ -481,6 +507,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 35.0780,
         lng: 129.0256,
@@ -493,6 +520,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 20",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 35.0979,
         lng: 129.0105,
@@ -505,6 +533,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "50 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 35.1016,
         lng: 129.0320,
@@ -517,6 +546,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h 15",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "market",
       map: {
         lat: 35.1028,
         lng: 129.0262,
@@ -537,6 +567,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "40 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 35.1587,
         lng: 129.1604,
@@ -549,6 +580,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Reservar",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 35.1609,
         lng: 129.1693,
@@ -561,6 +593,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Recomendado",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 35.1595,
         lng: 129.1608,
@@ -573,6 +606,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 35",
       tag: "Recomendado",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 35.1532,
         lng: 129.1187,
@@ -585,6 +619,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "55 min",
       tag: "Reservar",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 35.1539,
         lng: 129.1531,
@@ -605,6 +640,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 10",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 35.1882,
         lng: 129.2235,
@@ -617,6 +653,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "40 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 35.0975,
         lng: 129.1188,
@@ -629,6 +666,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "market",
       map: {
         lat: 35.1624,
         lng: 129.1635,
@@ -642,6 +680,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Busan Port",
       tag: "Reservar",
       image: "/places/street.jpg",
+      icon: "transport",
       map: {
         lat: 35.1150,
         lng: 129.0422,
@@ -654,6 +693,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Ferry",
       tag: "Reservar",
       image: "/places/street.jpg",
+      icon: "transport",
     },
   ],
 },
@@ -670,6 +710,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "40 min",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "market",
       map: {
         lat: 33.5897,
         lng: 130.4069,
@@ -682,6 +723,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "35 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 33.5944,
         lng: 130.4103,
@@ -694,6 +736,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "35 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 33.5936,
         lng: 130.4206,
@@ -706,6 +749,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "35 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 33.5983,
         lng: 130.4166,
@@ -718,6 +762,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "street",
       map: {
         lat: 33.5914,
         lng: 130.4117,
@@ -730,6 +775,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "50 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 33.5904,
         lng: 130.4017,
@@ -742,6 +788,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "40 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 33.5896,
         lng: 130.3994,
@@ -754,6 +801,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "55 min",
       tag: "Libre",
       image: "/places/cafe.jpg",
+      icon: "street",
       map: {
         lat: 33.5867,
         lng: 130.3927,
@@ -766,6 +814,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "food",
       map: {
         lat: 33.5930,
         lng: 130.4073,
@@ -786,6 +835,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "50 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 33.5204,
         lng: 130.5234,
@@ -798,6 +848,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "museum",
       map: {
         lat: 33.5237,
         lng: 130.5346,
@@ -810,6 +861,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "25 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 33.5893,
         lng: 130.3809,
@@ -822,6 +874,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "30 min",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "park",
       map: {
         lat: 33.5906,
         lng: 130.3792,
@@ -834,6 +887,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "30 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 33.5888,
         lng: 130.3802,
@@ -846,6 +900,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 33.5953,
         lng: 130.3519,
@@ -858,6 +913,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 10",
       tag: "Recomendado",
       image: "/places/street.jpg",
+      icon: "view",
       map: {
         lat: 33.5933,
         lng: 130.3515,
@@ -870,6 +926,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Recomendado",
       image: "/places/cafe.jpg",
+      icon: "park",
       map: {
         lat: 33.5992,
         lng: 130.4011,
@@ -891,6 +948,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Hotel → aeropuerto",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "transport",
       map: {
         lat: 33.5902,
         lng: 130.4017,
@@ -904,6 +962,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Vuelo",
       tag: "Reservar",
       image: "/places/street.jpg",
+      icon: "transport",
     },
     {
       time: "15:05",
@@ -912,6 +971,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Aeropuerto → hotel",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "transport",
       map: {
         lat: 13.6900,
         lng: 100.7501,
@@ -932,6 +992,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 13.7500,
         lng: 100.4913,
@@ -944,6 +1005,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 15",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 13.7465,
         lng: 100.4935,
@@ -956,6 +1018,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 10",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 13.7437,
         lng: 100.4888,
@@ -968,6 +1031,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 15",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "transport",
       map: {
         lat: 13.7367,
         lng: 100.5022,
@@ -980,6 +1044,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "45 min",
       tag: "Libre",
       image: "/places/cafe.jpg",
+      icon: "cafe",
       map: {
         lat: 13.7563,
         lng: 100.4896,
@@ -992,6 +1057,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "2 h",
       tag: "Reservar",
       image: "/places/cafe.jpg",
+      icon: "food",
       map: {
         lat: 13.7439,
         lng: 100.4892,
@@ -1012,6 +1078,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "street",
       map: {
         lat: 13.7349,
         lng: 100.5133,
@@ -1024,6 +1091,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "35 min",
       tag: "Libre",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 13.7376,
         lng: 100.5137,
@@ -1036,6 +1104,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Recomendado",
       image: "/places/market.jpg",
+      icon: "street",
       map: {
         lat: 13.7399,
         lng: 100.5111,
@@ -1048,6 +1117,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "45 min",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 13.7539,
         lng: 100.5064,
@@ -1060,6 +1130,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "35 min",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "transport",
       map: {
         lat: 13.7530,
         lng: 100.5430,
@@ -1072,6 +1143,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "45 min",
       tag: "Libre",
       image: "/places/cafe.jpg",
+      icon: "street",
       map: {
         lat: 13.7807,
         lng: 100.5448,
@@ -1084,6 +1156,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 30",
       tag: "Recomendado",
       image: "/places/street.jpg",
+      icon: "park",
       map: {
         lat: 13.7250,
         lng: 100.5590,
@@ -1096,6 +1169,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 40",
       tag: "Recomendado",
       image: "/places/cafe.jpg",
+      icon: "view",
       map: {
         lat: 13.7215,
         lng: 100.5143,
@@ -1117,6 +1191,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Tren / coche / traslado",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "transport",
     },
     {
       time: "08:30",
@@ -1125,6 +1200,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 14.3567,
         lng: 100.5671,
@@ -1137,6 +1213,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 14.3556,
         lng: 100.5686,
@@ -1149,6 +1226,7 @@ export const itinerary: ItineraryDay[] = [
       duration: "1 h 15",
       tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
         lat: 14.3386,
         lng: 100.5561,
@@ -1162,6 +1240,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Coche / tren / traslado",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "transport",
     },
     {
       time: "23:10",
@@ -1170,6 +1249,7 @@ export const itinerary: ItineraryDay[] = [
       transport: "Vuelo",
       tag: "Reservar",
       image: "/places/street.jpg",
+      icon: "transport",
     },
   ],
 },

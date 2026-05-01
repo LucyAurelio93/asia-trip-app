@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { activityIconMap } from "@/app/data/activityIcons";
 import type { ActivityIcon } from "@/app/data/itinerary";
@@ -45,6 +45,19 @@ function createEmojiIcon(activityIcon?: ActivityIcon) {
     iconAnchor: [17, 17],
     popupAnchor: [0, -18],
   });
+}
+
+function FitBounds({ points }: { points: { lat: number; lng: number }[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!points.length) return;
+
+    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng]));
+    map.fitBounds(bounds, { padding: [40, 40] });
+  }, [points, map]);
+
+  return null;
 }
 
 export default function DayMap({ places }: DayMapProps) {
@@ -94,13 +107,13 @@ export default function DayMap({ places }: DayMapProps) {
       className="h-[320px] w-full overflow-hidden rounded-2xl border"
     >
       <MapContainer
+        ref={mapRef}
         center={center}
         zoom={12}
         className="h-full w-full"
-        whenReady={(event) => {
-          mapRef.current = event.target;
+        whenReady={() => {
           setTimeout(() => {
-            event.target.invalidateSize();
+            mapRef.current?.invalidateSize();
           }, 100);
         }}
       >
@@ -109,6 +122,8 @@ export default function DayMap({ places }: DayMapProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <FitBounds points={validPoints.map((p) => p.map!)} />
+
         {validPoints.map((p, i) => (
           <Marker
             key={`${p.title}-${i}`}
@@ -116,13 +131,14 @@ export default function DayMap({ places }: DayMapProps) {
             icon={createEmojiIcon(p.icon)}
           >
             <Popup>
-              <strong>{p.title}</strong>
-              <br />
-              {p.time}
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-    </div>
-  );
+  <strong>{p.title}</strong>
+  <br />
+  {p.time}
+</Popup>
+</Marker>
+))}
+
+</MapContainer>
+</div>
+);
 }
