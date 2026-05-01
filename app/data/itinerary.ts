@@ -1,5 +1,21 @@
 export type ActivityTag = "Reservar" | "Recomendado" | "Libre";
 
+export type ActivityIcon =
+  | "temple"
+  | "market"
+  | "food"
+  | "view"
+  | "museum"
+  | "transport"
+  | "street"
+  | "park"
+  | "cafe";
+
+export type ActivityMap = {
+  lat: number;
+  lng: number;
+};
+
 export type Activity = {
   time: string;
   title: string;
@@ -8,6 +24,8 @@ export type Activity = {
   transport?: string;
   tag: ActivityTag;
   image: string;
+  icon?: ActivityIcon;
+  map?: ActivityMap;
   mapQuery?: string;
 };
 
@@ -34,65 +52,77 @@ export const itinerary: ItineraryDay[] = [
       transport: "Aeropuerto → hotel",
       tag: "Libre",
       image: "/places/street.jpg",
+      icon: "transport",
+      map: {
+        lat: 37.5189,
+        lng: 126.9071,
+      },
+      mapQuery: "Toyoko Inn Seoul Yeongdeungpo",
     },
     {
       time: "11:20",
       title: "Gyeongbokgung",
-      description: "Palacio principal de la dinastía Joseon y primera gran visita del viaje.",
-      duration: "1 h 30",
-      tag: "Libre",
+      description: "Palacio principal de la dinastía Joseon.",
+      duration: "1 h 30 min",
+      transport: "Metro línea 5",
+      tag: "Recomendado",
       image: "/places/gyeongbokgung.jpg",
+      icon: "temple",
       map: {
-        lat: 37.579617,
-        lng: 126.977041,
+        lat: 37.5796,
+        lng: 126.9770,
       },
     },
     {
-      time: "13:15",
+      time: "13:00",
       title: "Tongin Market",
-      description: "Mercado tradicional ideal para almorzar y probar comida coreana casual.",
+      description: "Mercado tradicional con sistema de fichas.",
+      duration: "1 h",
+      tag: "Comida",
+      image: "/places/market.jpg",
+      icon: "market",
+      map: {
+        lat: 37.5803,
+        lng: 126.9690,
+      },
+    },
+    {
+      time: "14:30",
+      title: "Bukchon Hanok Village",
+      description: "Barrio tradicional con casas hanok.",
       duration: "1 h",
       tag: "Recomendado",
-      image: "/places/market.jpg",
-      map: {
-        lat: 37.5802,
-        lng: 126.9686,
-      },
-    },
-    {
-      time: "14:35",
-      title: "Bukchon Hanok Village",
-      description: "Barrio histórico de casas hanok, calles angostas y vistas tradicionales.",
-      duration: "1 h",
-      tag: "Libre",
-      image: "/places/street.jpg",
+      image: "/places/bukchon.jpg",
+      icon: "street",
       map: {
         lat: 37.5826,
-        lng: 126.983,
+        lng: 126.9830,
       },
     },
     {
-      time: "15:50",
+      time: "16:00",
       title: "Unhyeongung",
-      description: "Residencia histórica pequeña, tranquila y breve.",
-      duration: "40 min",
+      description: "Residencia histórica menos turística.",
+      duration: "45 min",
       tag: "Libre",
-      image: "/places/gyeongbokgung.jpg",
+      image: "/places/temple.jpg",
+      icon: "temple",
       map: {
-        lat: 37.5788,
-        lng: 126.9916,
+        lat: 37.5763,
+        lng: 126.9853,
       },
     },
     {
-      time: "16:40",
+      time: "18:00",
       title: "Ikseondong",
-      description: "Barrio de cafés, tiendas y hanoks reciclados para cerrar el día.",
+      description: "Callejones con cafés y ambiente moderno.",
       duration: "2 h",
       tag: "Libre",
-      image: "/places/cafe.jpg",
+      image: "/places/street.jpg",
+      icon: "cafe",
       map: {
         lat: 37.5743,
-        lng: 126.9909,
+        lng: 126.9896,
       },
     },
   ],

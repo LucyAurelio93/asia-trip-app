@@ -99,6 +99,8 @@ export default function Home() {
             places={selectedDay.activities.map((a) => ({
               title: a.title,
               time: a.time,
+              icon: a.icon,
+             map: a.map,
             }))}
           />
         </div>
@@ -113,6 +115,7 @@ export default function Home() {
               description={activity.description}
               tag={activity.tag}
               image={activity.image}
+              icon={activity.icon}
             />
           ))}
         </div>
