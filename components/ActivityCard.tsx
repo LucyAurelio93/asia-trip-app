@@ -6,7 +6,7 @@ type ActivityCardProps = {
   title: string;
   description: string;
   tag?: string;
-  image: string; // 👈 ESTA ES LA CLAVE
+  image: string;
 };
 
 export default function ActivityCard({
@@ -16,6 +16,12 @@ export default function ActivityCard({
   tag,
   image,
 }: ActivityCardProps) {
+  const mapsQuery = title;
+
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  mapsQuery
+)}`;
+
   return (
     <div className="group flex items-center gap-4 rounded-2xl border border-[#f1e5dc] bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01]">
       
@@ -25,7 +31,7 @@ export default function ActivityCard({
           src={image}
           alt={title}
           fill
-           className="object-cover scale-110 group-hover:scale-125 transition-transform duration-500"
+          className="object-cover scale-110 transition-transform duration-500 group-hover:scale-125"
         />
       </div>
 
@@ -44,7 +50,7 @@ export default function ActivityCard({
         </span>
       </div>
 
-      {/* Estado */}
+      {/* Derecha: tag + mapa */}
       <div className="flex flex-col items-end gap-2">
         {tag && (
           <span className="rounded-full bg-[#f3e1d8] px-3 py-1 text-xs font-medium text-[#c26d5a]">
@@ -52,7 +58,15 @@ export default function ActivityCard({
           </span>
         )}
 
-        <MapPin size={16} className="text-[#d1a89b]" />
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 rounded-full border border-[#ead7ff] bg-[#f8f0ff] px-3 py-1 text-xs font-semibold text-[#8b5fbf]"
+        >
+          <MapPin size={13} />
+          Ver en mapa
+        </a>
       </div>
     </div>
   );
