@@ -102,8 +102,8 @@ function createEmojiIcon(activityIcon?: ActivityIcon, isHotel = false) {
 }
 
 // Skips the first mount — MapContainer already initializes at center.
-// On day changes, smoothly flies to the new anchor.
-function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
+// On day changes: if multiple points, fitBounds to show all then drift to hotel; else flyTo hotel.
+function RecenterMap({ lat, lng, allPoints }: { lat: number; lng: number; allPoints: Activity[] }) {
   const map = useMap();
   const mounted = useRef(false);
 
@@ -112,8 +112,15 @@ function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
       mounted.current = true;
       return;
     }
-    map.flyTo([lat, lng], CITY_ZOOM, { animate: true, duration: 0.8 });
-  }, [lat, lng, map]);
+    if (allPoints.length > 1) {
+      const bounds = L.latLngBounds(allPoints.map((p) => [p.map!.lat, p.map!.lng] as [number, number]));
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14, animate: false });
+      const currentZoom = map.getZoom();
+      map.flyTo([lat, lng], currentZoom, { animate: true, duration: 0.6 });
+    } else {
+      map.flyTo([lat, lng], CITY_ZOOM, { animate: true, duration: 0.8 });
+    }
+  }, [lat, lng, allPoints, map]);
 
   return null;
 }
@@ -219,7 +226,7 @@ export default function DayMap({ places, flyToRef }: DayMapProps) {
           keepBuffer={4}
         />
 
-        {anchor && <RecenterMap lat={anchor.map!.lat} lng={anchor.map!.lng} />}
+        {anchor && <RecenterMap lat={anchor.map!.lat} lng={anchor.map!.lng} allPoints={validPoints} />}
 
         {routeCoords.length >= 2 && (
           <Polyline
