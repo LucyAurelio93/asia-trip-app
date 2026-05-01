@@ -9,6 +9,7 @@ type ActivityCardProps = {
   tag?: string;
   image: string;
   icon?: ActivityIcon;
+  onClick?: () => void;
 };
 
 export default function ActivityCard({
@@ -17,6 +18,7 @@ export default function ActivityCard({
   description,
   tag,
   icon,
+  onClick,
 }: ActivityCardProps) {
   const mapsQuery = title;
   const iconData = icon ? activityIconMap[icon] : null;
@@ -26,7 +28,11 @@ export default function ActivityCard({
   )}`;
 
   return (
-    <div className="group flex items-center gap-4 rounded-2xl border border-[#f1e5dc] bg-white p-4 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md">
+    <div
+      className="group flex items-center gap-4 rounded-2xl border border-[#f1e5dc] bg-white p-4 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md"
+      onClick={onClick}
+      style={onClick ? { cursor: "pointer" } : undefined}
+    >
       <div
         className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border-2 border-white text-3xl shadow-sm"
         style={{ backgroundColor: iconData?.color ?? "#475569" }}

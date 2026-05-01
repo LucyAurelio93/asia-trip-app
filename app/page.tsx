@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import ActivityCard from "@/components/ActivityCard";
 import DaySelector from "@/components/DaySelector";
 import { itinerary } from "@/app/data/itinerary";
@@ -13,6 +13,7 @@ const DayMap = dynamic(() => import("@/components/DayMap"), {
 
 export default function Home() {
   const [selectedDayId, setSelectedDayId] = useState(itinerary[0]?.id ?? "");
+  const mapFlyTo = useRef<((lat: number, lng: number) => void) | null>(null);
 
   const selectedDay = useMemo(
     () => itinerary.find((day) => day.id === selectedDayId) ?? itinerary[0],
@@ -103,10 +104,24 @@ export default function Home() {
               icon: a.icon,
               map: a.map,
             }))}
+            flyToRef={mapFlyTo}
           />
         </div>
 
-        <div className="mt-5 space-y-4">
+        <div
+          className="mt-5 space-y-4"
+          style={{
+            backgroundColor: "#fdf6f1",
+            backgroundImage: [
+              "linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(253,246,241,1))",
+              "radial-gradient(circle at 20% 20%, rgba(0,0,0,0.02) 1px, transparent 1px)",
+              "radial-gradient(circle at 80% 80%, rgba(0,0,0,0.02) 1px, transparent 1px)",
+            ].join(", "),
+            backgroundSize: "auto, 40px 40px, 40px 40px",
+            borderRadius: "16px",
+            padding: "12px 8px",
+          }}
+        >
           {selectedDay.activities.map((activity) => (
             <ActivityCard
               key={`${selectedDay.id}-${activity.time}-${activity.title}`}
@@ -116,6 +131,11 @@ export default function Home() {
               tag={activity.tag}
               image={activity.image}
               icon={activity.icon}
+              onClick={
+                activity.map
+                  ? () => mapFlyTo.current?.(activity.map!.lat, activity.map!.lng)
+                  : undefined
+              }
             />
           ))}
         </div>

@@ -18,6 +18,7 @@ type Activity = {
 
 type DayMapProps = {
   places: Activity[];
+  flyToRef?: { current: ((lat: number, lng: number) => void) | null };
 };
 
 const CITY_ZOOM = 14;
@@ -117,7 +118,7 @@ function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
-export default function DayMap({ places }: DayMapProps) {
+export default function DayMap({ places, flyToRef }: DayMapProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -175,6 +176,16 @@ export default function DayMap({ places }: DayMapProps) {
       window.removeEventListener("resize", invalidate);
     };
   }, []);
+
+  useEffect(() => {
+    if (!flyToRef) return;
+    flyToRef.current = (lat: number, lng: number) => {
+      if (!mapRef.current) return;
+      mapRef.current.stop();
+      mapRef.current.flyTo([lat, lng], CITY_ZOOM, { animate: true, duration: 0.8 });
+    };
+    return () => { if (flyToRef) flyToRef.current = null; };
+  }, [flyToRef]);
 
   const handleReturnToHotel = () => {
     if (!anchor || !mapRef.current) return;
