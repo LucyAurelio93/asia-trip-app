@@ -7,7 +7,6 @@ import DaySelector from "@/components/DaySelector";
 import { itinerary } from "@/app/data/itinerary";
 import dynamic from "next/dynamic";
 
-// 👇 mapa solo en cliente (Leaflet lo necesita)
 const DayMap = dynamic(() => import("@/components/DayMap"), {
   ssr: false,
 });
@@ -32,28 +31,33 @@ export default function Home() {
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-[#FFF7F0] pb-28 text-[#3f2518]">
-      
       {/* HEADER */}
-      <header className="relative bg-[#FFF7F0] pt-6 pb-10 text-center">
-        <h1 className="text-4xl font-bold text-[#3b2416]">Asia Trip</h1>
-
-        <div className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-[#f3d9c9] bg-white px-4 py-1 text-sm text-[#7a4f3d] shadow-sm">
-          📅 14 de mayo – 27 de mayo
-        </div>
-
-        <div className="relative mt-6 h-[160px] w-full overflow-hidden">
+      <header className="relative overflow-hidden bg-[#FFF7F0]">
+        <div className="relative h-[300px] w-full overflow-hidden">
           <Image
             src="/cats-guide.png"
-            alt="Gatos"
+            alt="Asia Trip"
             fill
-            className="object-cover object-bottom"
+            priority
+            className="object-cover object-center"
           />
+
+          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-[#FFF7F0]" />
+
+          <div className="absolute inset-x-0 top-7 z-10 text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight text-[#3b2416] drop-shadow-sm">
+              Asia Trip
+            </h1>
+
+            <div className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-[#f3d9c9] bg-white/85 px-4 py-1 text-sm text-[#7a4f3d] shadow-sm backdrop-blur">
+              📅 14 de mayo – 27 de mayo
+            </div>
+          </div>
         </div>
       </header>
 
       {/* CONTENIDO */}
-      <section className="-mt-10 rounded-t-[28px] bg-[#FFF7F0] px-5 pt-5">
-
+      <section className="-mt-6 rounded-t-[28px] bg-[#FFF7F0] px-5 pt-5">
         <DaySelector
           days={itinerary.map(({ id, label, city, date }) => ({
             id,
@@ -67,9 +71,7 @@ export default function Home() {
         />
 
         <div className="mt-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            Plan del {selectedDay.label}
-          </h2>
+          <h2 className="text-xl font-semibold">Plan del {selectedDay.label}</h2>
 
           <button
             onClick={() => {
@@ -93,19 +95,17 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 🗺️ MAPA EMBEBIDO */}
         <div className="mt-4">
           <DayMap
             places={selectedDay.activities.map((a) => ({
               title: a.title,
               time: a.time,
               icon: a.icon,
-             map: a.map,
+              map: a.map,
             }))}
           />
         </div>
 
-        {/* ACTIVIDADES */}
         <div className="mt-5 space-y-4">
           {selectedDay.activities.map((activity) => (
             <ActivityCard
@@ -119,7 +119,6 @@ export default function Home() {
             />
           ))}
         </div>
-
       </section>
     </main>
   );
