@@ -69,6 +69,7 @@ export default function Home() {
   const [selectedDayId, setSelectedDayId] = useState(itinerary[0]?.id ?? "");
   const mapFlyTo = useRef<((lat: number, lng: number) => void) | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const noteTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [orderByDay, setOrderByDay] = useState<Record<string, string[]>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -86,6 +87,16 @@ export default function Home() {
       if (raw) setNotes(JSON.parse(raw) as Record<string, string>);
     } catch { /* ignore */ }
   }, []);
+
+  useEffect(() => {
+    if (!editingNoteKey) return;
+
+    const timer = window.setTimeout(() => {
+      noteTextareaRef.current?.focus();
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [editingNoteKey]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -163,6 +174,7 @@ export default function Home() {
               Nota personal
             </h3>
             <textarea
+              ref={noteTextareaRef}
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               placeholder="Escribe tu nota aquí..."
