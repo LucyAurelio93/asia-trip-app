@@ -174,14 +174,19 @@ export default function Home() {
               Nota personal
             </h3>
             <textarea
-              ref={noteTextareaRef}
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Escribe tu nota aquí..."
-              className="w-full resize-none rounded-xl border border-[#e0d5cc] bg-[#fdf6f1] p-3 text-sm text-[#2d2a26] outline-none focus:border-[#c26d5a]"
-              rows={4}
-              autoFocus
-            />
+  ref={noteTextareaRef}
+  value={noteText}
+  onChange={(e) => setNoteText(e.target.value)}
+  onPointerDown={() => {
+    noteTextareaRef.current?.focus();
+  }}
+  onTouchStart={() => {
+    noteTextareaRef.current?.focus();
+  }}
+  placeholder="Toca aquí y escribe tu nota..."
+  className="w-full resize-none rounded-xl border border-[#e0d5cc] bg-[#fdf6f1] p-3 text-sm text-[#2d2a26] outline-none focus:border-[#c26d5a]"
+  rows={4}
+/>
             <div className="mt-3 flex gap-2">
               <button
                 onClick={saveNote}
@@ -244,19 +249,18 @@ export default function Home() {
 
           <button
             onClick={() => {
-              const waypoints = orderedActivities
-                .slice(0, -1)
-                .map((a) => encodeURIComponent(a.title))
-                .join("|");
+              mapContainerRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
 
-              const destination =
-                orderedActivities[orderedActivities.length - 1].title;
+              const anchor =
+                orderedActivities.find((activity) => activity.icon === "hotel" && activity.map) ??
+                orderedActivities.find((activity) => activity.map);
 
-              const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                destination
-              )}&waypoints=${waypoints}`;
-
-              window.open(url, "_blank");
+              if (anchor?.map && mapFlyTo.current) {
+                mapFlyTo.current(anchor.map.lat, anchor.map.lng);
+              }
             }}
             className="rounded-full border border-[#f3c6c6] bg-[#ffecec] px-4 py-1 text-sm text-[#c96b6b]"
           >
