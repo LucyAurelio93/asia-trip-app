@@ -1,24 +1,141 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ActivityCard from "@/components/ActivityCard";
 import DaySelector from "@/components/DaySelector";
 import { itinerary } from "@/app/data/itinerary";
+import type { Activity } from "@/app/data/itinerary";
 import dynamic from "next/dynamic";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const DayMap = dynamic(() => import("@/components/DayMap"), {
   ssr: false,
 });
 
+// ── SortableActivityCard ─────────────────────────────────────────────────────
+
+type SortableProps = {
+  activity: Activity;
+  note: string | undefined;
+  onEditNote: () => void;
+  onClick?: () => void;
+};
+
+function SortableActivityCard({ activity, note, onEditNote, onClick }: SortableProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: activity.title });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform) ?? undefined,
+    transition: transition ?? undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <ActivityCard
+        time={activity.time}
+        title={activity.title}
+        description={activity.description}
+        tag={activity.tag}
+        image={activity.image}
+        icon={activity.icon}
+        onClick={onClick}
+        note={note}
+        onEditNote={onEditNote}
+        isDragging={isDragging}
+      />
+    </div>
+  );
+}
+
+// ── Home ─────────────────────────────────────────────────────────────────────
+
 export default function Home() {
   const [selectedDayId, setSelectedDayId] = useState(itinerary[0]?.id ?? "");
   const mapFlyTo = useRef<((lat: number, lng: number) => void) | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const [orderByDay, setOrderByDay] = useState<Record<string, string[]>>({});
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [editingNoteKey, setEditingNoteKey] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState("");
+
+  // Load persisted state from localStorage after mount to avoid SSR mismatch
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("asia-trip-order");
+      if (raw) setOrderByDay(JSON.parse(raw) as Record<string, string[]>);
+    } catch { /* ignore */ }
+    try {
+      const raw = localStorage.getItem("asia-trip-notes");
+      if (raw) setNotes(JSON.parse(raw) as Record<string, string>);
+    } catch { /* ignore */ }
+  }, []);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
+    })
+  );
+
   const selectedDay = useMemo(
     () => itinerary.find((day) => day.id === selectedDayId) ?? itinerary[0],
     [selectedDayId]
   );
+
+  const orderedActivities = useMemo(() => {
+    if (!selectedDay) return [];
+    const savedOrder = orderByDay[selectedDay.id];
+    if (!savedOrder) return selectedDay.activities;
+    const orderMap = new Map(savedOrder.map((title, i) => [title, i]));
+    return [...selectedDay.activities].sort((a, b) => {
+      const ai = orderMap.get(a.title) ?? Infinity;
+      const bi = orderMap.get(b.title) ?? Infinity;
+      return ai - bi;
+    });
+  }, [selectedDay, orderByDay]);
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !selectedDay) return;
+    const oldIndex = orderedActivities.findIndex((a) => a.title === active.id);
+    const newIndex = orderedActivities.findIndex((a) => a.title === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const newOrder = arrayMove(orderedActivities, oldIndex, newIndex).map((a) => a.title);
+    const updated = { ...orderByDay, [selectedDay.id]: newOrder };
+    setOrderByDay(updated);
+    localStorage.setItem("asia-trip-order", JSON.stringify(updated));
+  }
+
+  function openNoteEditor(activityTitle: string) {
+    if (!selectedDay) return;
+    const key = `${selectedDay.id}::${activityTitle}`;
+    setEditingNoteKey(key);
+    setNoteText(notes[key] ?? "");
+  }
+
+  function saveNote() {
+    if (!editingNoteKey) return;
+    const updated = { ...notes, [editingNoteKey]: noteText };
+    setNotes(updated);
+    localStorage.setItem("asia-trip-notes", JSON.stringify(updated));
+    setEditingNoteKey(null);
+  }
 
   if (!selectedDay) {
     return (
@@ -32,6 +149,45 @@ export default function Home() {
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-[420px] overflow-hidden bg-[#FFF7F0] pb-28 text-[#3f2518]">
+      {/* NOTE EDITING MODAL */}
+      {editingNoteKey && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4"
+          onClick={() => setEditingNoteKey(null)}
+        >
+          <div
+            className="w-full max-w-[400px] rounded-2xl bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-3 text-base font-semibold text-[#2d2a26]">
+              Nota personal
+            </h3>
+            <textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Escribe tu nota aquí..."
+              className="w-full resize-none rounded-xl border border-[#e0d5cc] bg-[#fdf6f1] p-3 text-sm text-[#2d2a26] outline-none focus:border-[#c26d5a]"
+              rows={4}
+              autoFocus
+            />
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={saveNote}
+                className="flex-1 rounded-full bg-[#c26d5a] py-2 text-sm font-semibold text-white"
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => setEditingNoteKey(null)}
+                className="flex-1 rounded-full border border-[#e0d5cc] py-2 text-sm text-[#7a746f]"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* HEADER */}
       <header className="relative overflow-hidden bg-[#FFF7F0] pt-[env(safe-area-inset-top)]">
         <div className="relative h-[300px] w-full overflow-hidden">
@@ -76,13 +232,13 @@ export default function Home() {
 
           <button
             onClick={() => {
-              const waypoints = selectedDay.activities
+              const waypoints = orderedActivities
                 .slice(0, -1)
                 .map((a) => encodeURIComponent(a.title))
                 .join("|");
 
               const destination =
-                selectedDay.activities[selectedDay.activities.length - 1].title;
+                orderedActivities[orderedActivities.length - 1].title;
 
               const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
                 destination
@@ -98,7 +254,7 @@ export default function Home() {
 
         <div ref={mapContainerRef} className="mt-4">
           <DayMap
-            places={selectedDay.activities.map((a) => ({
+            places={orderedActivities.map((a) => ({
               title: a.title,
               time: a.time,
               icon: a.icon,
@@ -122,32 +278,36 @@ export default function Home() {
             padding: "12px 8px",
           }}
         >
-          {selectedDay.activities.map((activity) => (
-            <ActivityCard
-              key={`${selectedDay.id}-${activity.time}-${activity.title}`}
-              time={activity.time}
-              title={activity.title}
-              description={activity.description}
-              tag={activity.tag}
-              image={activity.image}
-              icon={activity.icon}
-              onClick={
-  activity.map
-    ? () => {
-        mapContainerRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-
-        mapFlyTo.current?.(
-          activity.map!.lat,
-          activity.map!.lng
-        );
-      }
-    : undefined
-}
-            />
-          ))}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={orderedActivities.map((a) => a.title)}
+              strategy={verticalListSortingStrategy}
+            >
+              {orderedActivities.map((activity) => (
+                <SortableActivityCard
+                  key={`${selectedDay.id}-${activity.title}`}
+                  activity={activity}
+                  note={notes[`${selectedDay.id}::${activity.title}`]}
+                  onEditNote={() => openNoteEditor(activity.title)}
+                  onClick={
+                    activity.map
+                      ? () => {
+                          mapContainerRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                          mapFlyTo.current?.(activity.map!.lat, activity.map!.lng);
+                        }
+                      : undefined
+                  }
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
       </section>
     </main>
