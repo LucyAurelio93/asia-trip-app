@@ -18,6 +18,7 @@ export type ActivityMap = {
 };
 
 export type Activity = {
+  id: string;
   time: string;
   title: string;
   description: string;
@@ -46,6 +47,7 @@ export const itinerary: ItineraryDay[] = [
   date: "14 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Seoul Yeongdeungpo",
       description: "Alojamiento base del día",
@@ -56,6 +58,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
     },
     {
+      id: "gyeongbokgung",
       time: "11:20",
       title: "Gyeongbokgung",
       description: "Palacio principal de la dinastía Joseon.",
@@ -70,6 +73,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "tongin-market",
       time: "13:00",
       title: "Tongin Market",
       description: "Mercado tradicional con sistema de fichas.",
@@ -83,6 +87,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "bukchon-hanok",
       time: "14:30",
       title: "Bukchon Hanok Village",
       description: "Barrio tradicional con casas hanok.",
@@ -96,6 +101,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "unhyeongung",
       time: "16:00",
       title: "Unhyeongung",
       description: "Residencia histórica menos turística.",
@@ -109,6 +115,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ikseondong",
       time: "18:00",
       title: "Ikseondong",
       description: "Callejones con cafés y ambiente moderno.",
@@ -130,6 +137,7 @@ export const itinerary: ItineraryDay[] = [
   date: "15 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Seoul Yeongdeungpo",
       description: "Alojamiento base del día",
@@ -140,6 +148,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
     },
     {
+      id: "sungnyemun",
       time: "10:10",
       title: "Sungnyemun Gate",
       description: "Puerta histórica monumental en medio de la ciudad moderna.",
@@ -153,6 +162,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "namdaemun-market",
       time: "10:40",
       title: "Mercado Namdaemun",
       description: "Mercado tradicional enorme para vitrinear, comer y recorrer.",
@@ -166,6 +176,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "city-hall",
       time: "12:45",
       title: "Seoul City Hall",
       description: "Parada urbana y arquitectónica en el centro cívico.",
@@ -179,6 +190,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "myeongdong-cathedral",
       time: "13:35",
       title: "Catedral de Myeong-dong",
       description: "Iglesia histórica de ladrillo rojo en pleno centro comercial.",
@@ -192,6 +204,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "myeongdong",
       time: "17:00",
       title: "Myeong-dong",
       description: "Street food, compras, cosmética y ambiente nocturno.",
@@ -205,6 +218,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "namsan-cable-car",
       time: "19:00",
       title: "Teleférico Namsan",
       description: "Subida al cerro para conectar con la vista nocturna.",
@@ -218,6 +232,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "n-seoul-tower",
       time: "19:30",
       title: "N Seoul Tower",
       description: "Mirador panorámico para cerrar el día con Seúl iluminado.",
@@ -239,6 +254,7 @@ export const itinerary: ItineraryDay[] = [
   date: "16 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Seoul Yeongdeungpo",
       description: "Alojamiento base del día",
@@ -249,6 +265,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
     },
     {
+      id: "national-museum",
       time: "09:50",
       title: "National Museum of Korea",
       description: "Gran museo de historia, arte y patrimonio coreano.",
@@ -262,6 +279,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "yongsan-park",
       time: "12:15",
       title: "Yongsan Park",
       description: "Paseo breve para descomprimir después del museo.",
@@ -275,6 +293,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ichon",
       time: "12:45",
       title: "Ichon",
       description: "Almuerzo eficiente en una zona más local y tranquila.",
@@ -288,6 +307,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "leeum-museum",
       time: "14:15",
       title: "Leeum Museum",
       description: "Museo de arte y arquitectura contemporánea en Hannam.",
@@ -301,6 +321,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "yeondeunghoe",
       time: "19:00",
       title: "Desfile Yeondeunghoe",
       description: "Gran desfile de faroles del Lotus Lantern Festival.",
@@ -314,6 +335,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "daedong-hanmadang",
       time: "21:30",
       title: "Daedong Hanmadang",
       description: "Celebración posterior al desfile en Jonggak.",
@@ -335,6 +357,7 @@ export const itinerary: ItineraryDay[] = [
   date: "17 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Seoul Yeongdeungpo",
       description: "Alojamiento base del día",
@@ -345,6 +368,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
     },
     {
+      id: "seoul-sky",
       time: "10:40",
       title: "Seoul Sky",
       description: "Mirador alto en Lotte World Tower con vista panorámica de Seúl.",
@@ -358,6 +382,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "seokchon-lake",
       time: "13:20",
       title: "Lago Seokchon",
       description: "Paseo ligero y fotogénico junto a la torre.",
@@ -371,6 +396,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "bongeunsa",
       time: "14:15",
       title: "Bongeunsa",
       description: "Templo budista tradicional en contraste con Gangnam moderno.",
@@ -384,6 +410,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "coex-mall",
       time: "15:00",
       title: "Starfield COEX Mall",
       description: "Mall urbano con biblioteca, tiendas y cafés.",
@@ -397,6 +424,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "jogyesa-insadong",
       time: "16:45",
       title: "Jogyesa / Insadong",
       description: "Ambiente festivalero, faroles y calles tradicionales.",
@@ -410,6 +438,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "yeondeungnori",
       time: "19:00",
       title: "Yeondeungnori",
       description: "Celebración final del festival entre Insa-dong y Jogyesa.",
@@ -431,6 +460,7 @@ export const itinerary: ItineraryDay[] = [
   date: "18 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Seoul Yeongdeungpo",
       description: "Alojamiento base del día",
@@ -441,6 +471,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Seoul Yeongdeungpo Seoul",
     },
     {
+      id: "ddp",
       time: "10:10",
       title: "Dongdaemun / DDP",
       description: "Arquitectura futurista y paseo urbano moderno.",
@@ -454,6 +485,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ihwa-mural",
       time: "11:45",
       title: "Ihwa Mural Village",
       description: "Barrio en subida con murales, escaleras y vistas.",
@@ -467,6 +499,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "naksan",
       time: "12:35",
       title: "Naksan / muralla",
       description: "Tramo breve de muralla con vista urbana.",
@@ -480,6 +513,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "gwangjang-market",
       time: "13:25",
       title: "Gwangjang Market",
       description: "Mercado clásico para almorzar y probar comida callejera coreana.",
@@ -493,6 +527,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "cheonggyecheon",
       time: "15:20",
       title: "Cheonggyecheon",
       description: "Paseo lineal junto al canal urbano.",
@@ -506,6 +541,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "cheonggyecheon-night",
       time: "18:30",
       title: "Cheonggyecheon nocturno",
       description: "Misma zona en la mejor franja visual, con luces y ambiente.",
@@ -527,6 +563,7 @@ export const itinerary: ItineraryDay[] = [
   date: "19 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Busan Haeundae 2",
       description: "Alojamiento base del día",
@@ -537,6 +574,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Busan Haeundae 2",
     },
     {
+      id: "srt-seoul-busan",
       time: "08:00",
       title: "SRT Seúl → Busan",
       description: "Traslado principal del día en tren de alta velocidad.",
@@ -547,6 +585,7 @@ export const itinerary: ItineraryDay[] = [
       icon: "transport",
     },
     {
+      id: "songdo-cable-car",
       time: "13:00",
       title: "Songdo Marine Cable Car",
       description: "Teleférico marino con vistas abiertas de costa y acantilado.",
@@ -560,6 +599,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "gamcheon",
       time: "14:25",
       title: "Gamcheon Culture Village",
       description: "Barrio colorido en ladera, miradores y callejuelas.",
@@ -573,6 +613,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "busan-tower",
       time: "16:10",
       title: "Busan Tower",
       description: "Mirador urbano en Yongdusan Park.",
@@ -586,6 +627,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "bupyeong-market",
       time: "18:00",
       title: "Bupyeong Kkangtong Market",
       description: "Mercado tradicional y cena en zona Nampo.",
@@ -607,6 +649,7 @@ export const itinerary: ItineraryDay[] = [
   date: "20 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Busan Haeundae 2",
       description: "Alojamiento base del día",
@@ -617,6 +660,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Busan Haeundae 2",
     },
     {
+      id: "haeundae-beach",
       time: "09:30",
       title: "Haeundae Beach",
       description: "Paseo liviano por una de las playas más emblemáticas de Busan.",
@@ -630,6 +674,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "blue-line-park",
       time: "10:30",
       title: "Haeundae Blue Line Park",
       description: "Cápsulas o tren costero con vista al mar.",
@@ -643,6 +688,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "busan-x-sky",
       time: "13:00",
       title: "Busan X the Sky",
       description: "Mirador moderno frente al mar en Haeundae.",
@@ -656,6 +702,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "gwangalli-beach",
       time: "19:10",
       title: "Gwangalli Beach",
       description: "Vista nocturna del Gwangan Bridge iluminado.",
@@ -669,6 +716,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "bay-101-yacht",
       time: "22:00",
       title: "The Bay 101 Public Yacht",
       description: "Paseo nocturno en yate con vista a Haeundae y Gwangalli.",
@@ -690,6 +738,7 @@ export const itinerary: ItineraryDay[] = [
   date: "21 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Toyoko Inn Busan Haeundae 2",
       description: "Alojamiento base del día",
@@ -700,6 +749,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Toyoko Inn Busan Haeundae 2",
     },
     {
+      id: "haedong-yonggungsa",
       time: "09:20",
       title: "Haedong Yonggungsa",
       description: "Templo costero entre escaleras, linternas y mar.",
@@ -713,6 +763,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "oryukdo-skywalk",
       time: "11:10",
       title: "Oryukdo Skywalk",
       description: "Plataforma de vidrio sobre acantilado con vista al mar.",
@@ -726,6 +777,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "haeundae-market",
       time: "12:35",
       title: "Haeundae Market",
       description: "Mercado local para almorzar antes del ferry.",
@@ -739,6 +791,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ferry-checkin",
       time: "17:00",
       title: "Check-in ferry",
       description: "Llegada al terminal internacional y proceso de embarque.",
@@ -753,6 +806,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ferry-busan-fukuoka",
       time: "20:00",
       title: "Ferry Busan → Fukuoka",
       description: "Salida internacional hacia Japón.",
@@ -770,6 +824,7 @@ export const itinerary: ItineraryDay[] = [
   date: "22 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Fukuoka Toei Hotel",
       description: "Alojamiento base del día",
@@ -780,6 +835,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Fukuoka Toei Hotel",
     },
     {
+      id: "yanagibashi-market",
       time: "10:15",
       title: "Yanagibashi Rengo Market",
       description: "Mercado cubierto local de pescados, mariscos y comercio de barrio.",
@@ -793,6 +849,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "kushida",
       time: "11:15",
       title: "Kushida Shrine",
       description: "Santuario histórico compacto y central en Hakata.",
@@ -806,6 +863,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "tochoji",
       time: "12:00",
       title: "Tochoji Temple",
       description: "Templo con gran Buda de madera y atmósfera sobria.",
@@ -819,6 +877,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "shofukuji",
       time: "12:50",
       title: "Shofukuji",
       description: "Primer templo zen de Japón, tranquilo y contemplativo.",
@@ -832,6 +891,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "canal-city",
       time: "13:45",
       title: "Canal City Hakata",
       description: "Complejo comercial con canal interior, almuerzo y paseo.",
@@ -845,6 +905,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "tenjin-underground",
       time: "15:50",
       title: "Tenjin Underground Mall",
       description: "Galería subterránea urbana para caminar y vitrinear.",
@@ -858,6 +919,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "acros-fukuoka",
       time: "17:00",
       title: "Acros Fukuoka",
       description: "Edificio-terraza verde tipo montaña urbana.",
@@ -871,6 +933,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "daimyo",
       time: "17:55",
       title: "Daimyo",
       description: "Barrio trendy de boutiques, cafés y calles secundarias.",
@@ -884,6 +947,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "nakasu",
       time: "19:10",
       title: "Nakasu",
       description: "Yatai, luces y ambiente nocturno junto al río.",
@@ -905,6 +969,7 @@ export const itinerary: ItineraryDay[] = [
   date: "23 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Fukuoka Toei Hotel",
       description: "Alojamiento base del día",
@@ -915,6 +980,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Fukuoka Toei Hotel",
     },
     {
+      id: "dazaifu",
       time: "09:10",
       title: "Dazaifu Tenmangu",
       description: "Santuario clásico con eje peatonal, puentes y estanques.",
@@ -928,6 +994,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "kyushu-museum",
       time: "10:15",
       title: "Kyushu National Museum",
       description: "Museo moderno junto a Dazaifu, ideal para visita selectiva.",
@@ -941,6 +1008,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ohori-park",
       time: "14:30",
       title: "Ohori Park",
       description: "Parque urbano con lago central y paseo tranquilo.",
@@ -954,6 +1022,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ohori-garden",
       time: "14:55",
       title: "Ohori Japanese Garden",
       description: "Jardín japonés clásico, contenido y contemplativo.",
@@ -967,6 +1036,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ohori-boat",
       time: "15:30",
       title: "Bote en Ohori Park",
       description: "Paseo simple en bote sobre el lago.",
@@ -980,6 +1050,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "seaside-momochi",
       time: "16:20",
       title: "Seaside Momochi",
       description: "Paseo marítimo moderno con vista abierta al mar.",
@@ -993,6 +1064,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "fukuoka-tower",
       time: "18:05",
       title: "Fukuoka Tower",
       description: "Mirador costero para atardecer y primeras luces.",
@@ -1006,6 +1078,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "sora",
       time: "20:00",
       title: "SORA",
       description: "Jardín japonés iluminado con intervención de luz y arte digital.",
@@ -1027,6 +1100,7 @@ export const itinerary: ItineraryDay[] = [
   date: "24 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Valia Hotel Bangkok",
       description: "Alojamiento base del día",
@@ -1037,6 +1111,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Valia Hotel Bangkok",
     },
     {
+      id: "fukuoka-airport-transfer",
       time: "08:30",
       title: "Traslado al aeropuerto de Fukuoka",
       description: "Salida al aeropuerto con margen para vuelo internacional.",
@@ -1051,6 +1126,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "flight-fukuoka-bangkok",
       time: "11:35",
       title: "Vuelo Fukuoka → Bangkok",
       description: "Tramo aéreo hacia Tailandia.",
@@ -1061,6 +1137,7 @@ export const itinerary: ItineraryDay[] = [
       icon: "transport",
     },
     {
+      id: "suvarnabhumi-arrival",
       time: "15:05",
       title: "Llegada a Suvarnabhumi",
       description: "Migración, equipaje y traslado al hotel.",
@@ -1082,6 +1159,7 @@ export const itinerary: ItineraryDay[] = [
   date: "25 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Valia Hotel Bangkok",
       description: "Alojamiento base del día",
@@ -1092,6 +1170,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Valia Hotel Bangkok",
     },
     {
+      id: "grand-palace",
       time: "08:30",
       title: "Grand Palace + Wat Phra Kaew",
       description: "Complejo real y Templo del Buda Esmeralda, ancla del día.",
@@ -1105,6 +1184,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "wat-pho",
       time: "10:45",
       title: "Wat Pho",
       description: "Templo del Buda reclinado y patios amplios.",
@@ -1118,6 +1198,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "wat-arun",
       time: "13:20",
       title: "Wat Arun",
       description: "Templo de la Aurora, prang blanco y vista al río.",
@@ -1131,6 +1212,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "chao-phraya-boat",
       time: "15:00",
       title: "Chao Phraya Boat",
       description: "Paseo escénico por la ribera histórica de Bangkok.",
@@ -1144,6 +1226,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "tha-maharaj",
       time: "16:15",
       title: "Tha Maharaj",
       description: "Pausa ribereña con cafés y vista al río.",
@@ -1157,6 +1240,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "sala-rattanakosin",
       time: "17:30",
       title: "Sala Rattanakosin Eatery",
       description: "Cena ribereña con vista famosa a Wat Arun.",
@@ -1178,6 +1262,7 @@ export const itinerary: ItineraryDay[] = [
   date: "26 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Valia Hotel Bangkok",
       description: "Alojamiento base del día",
@@ -1188,6 +1273,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Valia Hotel Bangkok",
     },
     {
+      id: "talat-noi",
       time: "09:15",
       title: "Talat Noi",
       description: "Barrio antiguo con street art, talleres y cafés.",
@@ -1201,6 +1287,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "wat-traimit",
       time: "10:30",
       title: "Wat Traimit",
       description: "Templo del famoso Buda de Oro.",
@@ -1214,6 +1301,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "yaowarat",
       time: "11:05",
       title: "Yaowarat / Chinatown",
       description: "Avenida intensa de letreros, oro, comida y caos urbano.",
@@ -1227,6 +1315,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "wat-saket",
       time: "13:25",
       title: "Wat Saket",
       description: "Golden Mount, colina-templo con chedi dorado y vista urbana.",
@@ -1240,6 +1329,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "khlong-boat",
       time: "14:20",
       title: "Khlong Saen Saep Boat",
       description: "Bote de canal local, rápido y útil como experiencia urbana.",
@@ -1253,6 +1343,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ari-district",
       time: "15:25",
       title: "Ari District",
       description: "Barrio moderno de cafés, tiendas y calles residenciales.",
@@ -1266,6 +1357,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "benjakitti-park",
       time: "16:40",
       title: "Benjakitti Park",
       description: "Parque urbano con lagos, pasarelas y skyline.",
@@ -1279,6 +1371,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "sky-bar-lebua",
       time: "19:20",
       title: "Sky Bar at lebua",
       description: "Rooftop famoso con vista panorámica de Bangkok.",
@@ -1300,6 +1393,7 @@ export const itinerary: ItineraryDay[] = [
   date: "27 may",
   activities: [
     {
+      id: "hotel",
       time: "Hotel",
       title: "Valia Hotel Bangkok",
       description: "Alojamiento base del día",
@@ -1310,6 +1404,7 @@ export const itinerary: ItineraryDay[] = [
       mapQuery: "Valia Hotel Bangkok",
     },
     {
+      id: "bangkok-ayutthaya",
       time: "07:00",
       title: "Bangkok → Ayutthaya",
       description: "Salida temprana para aprovechar la mañana en Ayutthaya.",
@@ -1320,6 +1415,7 @@ export const itinerary: ItineraryDay[] = [
       icon: "transport",
     },
     {
+      id: "wat-mahathat",
       time: "08:30",
       title: "Wat Mahathat",
       description: "Ruinas históricas y cabeza de Buda entre raíces.",
@@ -1333,6 +1429,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "wat-phra-si-sanphet",
       time: "09:40",
       title: "Wat Phra Si Sanphet",
       description: "Gran conjunto histórico dentro del parque arqueológico.",
@@ -1346,6 +1443,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "wat-chaiwatthanaram",
       time: "12:30",
       title: "Wat Chaiwatthanaram",
       description: "Cierre visual fuerte y uno de los templos más fotogénicos.",
@@ -1359,6 +1457,7 @@ export const itinerary: ItineraryDay[] = [
       },
     },
     {
+      id: "ayutthaya-bangkok",
       time: "14:00",
       title: "Ayutthaya → Bangkok",
       description: "Retorno logístico serio antes del vuelo nocturno.",
@@ -1369,6 +1468,7 @@ export const itinerary: ItineraryDay[] = [
       icon: "transport",
     },
     {
+      id: "flight-bangkok-seoul",
       time: "23:10",
       title: "Vuelo Bangkok → Seúl",
       description: "Vuelo internacional de regreso.",

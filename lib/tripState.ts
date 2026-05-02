@@ -48,3 +48,74 @@ export function saveLocalOrder(orderByDay: TripOrderState): void {
 export function saveLocalNotes(notes: TripNotesState): void {
   localStorage.setItem("asia-trip-notes", JSON.stringify(notes));
 }
+
+type ActivityRef = { id: string; title: string };
+type DayRef = { id: string; activities: ActivityRef[] };
+
+function buildMaps(itinerary: DayRef[]) {
+  const titleToId: Record<string, Record<string, string>> = {};
+  const validIds: Record<string, Set<string>> = {};
+  for (const day of itinerary) {
+    titleToId[day.id] = {};
+    validIds[day.id] = new Set();
+    for (const a of day.activities) {
+      titleToId[day.id][a.title] = a.id;
+      validIds[day.id].add(a.id);
+    }
+  }
+  return { titleToId, validIds };
+}
+
+export function migrateOrderToActivityIds(
+  order: TripOrderState,
+  itinerary: DayRef[]
+): TripOrderState {
+  const { titleToId, validIds } = buildMaps(itinerary);
+  const result: TripOrderState = {};
+  for (const [dayId, items] of Object.entries(order)) {
+    const dayValidIds = validIds[dayId];
+    const dayTitleToId = titleToId[dayId];
+    if (!dayValidIds || !dayTitleToId) continue;
+    const seen = new Set<string>();
+    const migrated: string[] = [];
+    for (const item of items) {
+      const activityId = dayValidIds.has(item) ? item : dayTitleToId[item];
+      if (activityId && !seen.has(activityId)) {
+        seen.add(activityId);
+        migrated.push(activityId);
+      }
+    }
+    if (migrated.length > 0) result[dayId] = migrated;
+  }
+  return result;
+}
+
+export function migrateNotesToActivityIds(
+  notes: TripNotesState,
+  itinerary: DayRef[]
+): TripNotesState {
+  const { titleToId, validIds } = buildMaps(itinerary);
+  const result: TripNotesState = {};
+  for (const [key, noteList] of Object.entries(notes)) {
+    const sep = key.indexOf("::");
+    if (sep === -1) continue;
+    const dayId = key.substring(0, sep);
+    const activityRef = key.substring(sep + 2);
+    const dayValidIds = validIds[dayId];
+    const dayTitleToId = titleToId[dayId];
+    if (!dayValidIds || !dayTitleToId) continue;
+    const activityId = dayValidIds.has(activityRef) ? activityRef : dayTitleToId[activityRef];
+    if (!activityId) continue;
+    const newKey = `${dayId}::${activityId}`;
+    if (result[newKey]) {
+      const merged = [...result[newKey]];
+      for (const note of noteList) {
+        if (!merged.includes(note)) merged.push(note);
+      }
+      result[newKey] = merged;
+    } else {
+      result[newKey] = noteList;
+    }
+  }
+  return result;
+}

@@ -16,6 +16,8 @@ import {
   saveLocalNotes,
   normalizeOrder,
   normalizeNotes,
+  migrateOrderToActivityIds,
+  migrateNotesToActivityIds,
 } from "@/lib/tripState";
 import { supabase } from "@/lib/supabase";
 
@@ -51,7 +53,7 @@ type SortableProps = {
 
 function SortableActivityCard({ activity, notes, onEditNote, onClick }: SortableProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: activity.title });
+    useSortable({ id: activity.id });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform) ?? undefined,
@@ -135,8 +137,12 @@ export default function Home() {
     didLoadRef.current = true;
 
     const { orderByDay: localOrder, notes: localNotes } = loadLocalTripState();
-    setOrderByDay(localOrder);
-    setNotes(localNotes);
+    const migratedOrder = migrateOrderToActivityIds(localOrder, itinerary);
+    const migratedNotes = migrateNotesToActivityIds(localNotes, itinerary);
+    setOrderByDay(migratedOrder);
+    setNotes(migratedNotes);
+    saveLocalOrder(migratedOrder);
+    saveLocalNotes(migratedNotes);
 
     (async () => {
       const { data, error } = await supabase
@@ -163,8 +169,8 @@ export default function Home() {
 
       if (!hasRemoteData) return;
 
-      const remoteOrder = normalizeOrder(data.order_by_day);
-      const remoteNotes = normalizeNotes(data.notes);
+      const remoteOrder = migrateOrderToActivityIds(normalizeOrder(data.order_by_day), itinerary);
+      const remoteNotes = migrateNotesToActivityIds(normalizeNotes(data.notes), itinerary);
 
       setOrderByDay(remoteOrder);
       setNotes(remoteNotes);
@@ -198,10 +204,10 @@ export default function Home() {
     if (!selectedDay) return [];
     const savedOrder = orderByDay[selectedDay.id];
     if (!savedOrder) return selectedDay.activities;
-    const orderMap = new Map(savedOrder.map((title, i) => [title, i]));
+    const orderMap = new Map(savedOrder.map((id, i) => [id, i]));
     return [...selectedDay.activities].sort((a, b) => {
-      const ai = orderMap.get(a.title) ?? Infinity;
-      const bi = orderMap.get(b.title) ?? Infinity;
+      const ai = orderMap.get(a.id) ?? Infinity;
+      const bi = orderMap.get(b.id) ?? Infinity;
       return ai - bi;
     });
   }, [selectedDay, orderByDay]);
@@ -209,17 +215,17 @@ export default function Home() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id || !selectedDay) return;
-    const oldIndex = orderedActivities.findIndex((a) => a.title === active.id);
-    const newIndex = orderedActivities.findIndex((a) => a.title === over.id);
+    const oldIndex = orderedActivities.findIndex((a) => a.id === active.id);
+    const newIndex = orderedActivities.findIndex((a) => a.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
-    const newOrder = arrayMove(orderedActivities, oldIndex, newIndex).map((a) => a.title);
+    const newOrder = arrayMove(orderedActivities, oldIndex, newIndex).map((a) => a.id);
     const updated = { ...orderByDay, [selectedDay.id]: newOrder };
     persistOrder(updated);
   }
 
-  function openNoteEditor(activityTitle: string) {
+  function openNoteEditor(activityId: string) {
     if (!selectedDay) return;
-    const key = `${selectedDay.id}::${activityTitle}`;
+    const key = `${selectedDay.id}::${activityId}`;
     setEditingNoteKey(key);
     setNoteText("");
   }
@@ -406,15 +412,15 @@ export default function Home() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={orderedActivities.map((a) => a.title)}
+              items={orderedActivities.map((a) => a.id)}
               strategy={verticalListSortingStrategy}
             >
               {orderedActivities.map((activity) => (
                 <SortableActivityCard
-                  key={`${selectedDay.id}-${activity.title}`}
+                  key={`${selectedDay.id}-${activity.id}`}
                   activity={activity}
-                  notes={notes[`${selectedDay.id}::${activity.title}`] ?? []}
-                  onEditNote={() => openNoteEditor(activity.title)}
+                  notes={notes[`${selectedDay.id}::${activity.id}`] ?? []}
+                  onEditNote={() => openNoteEditor(activity.id)}
                   onClick={
                     activity.map
                       ? () => {
