@@ -16,7 +16,7 @@ type Activity = {
   };
 };
 
-type MapHandle = {
+export type MapHandle = {
   flyTo: (lat: number, lng: number) => void;
   fitToPlaces: () => void;
 };

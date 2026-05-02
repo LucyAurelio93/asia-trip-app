@@ -7,6 +7,14 @@ import DaySelector from "@/components/DaySelector";
 import { itinerary } from "@/app/data/itinerary";
 import type { Activity } from "@/app/data/itinerary";
 import dynamic from "next/dynamic";
+import type { MapHandle } from "@/components/DayMap";
+import {
+  TripOrderState,
+  TripNotesState,
+  loadLocalTripState,
+  saveLocalOrder,
+  saveLocalNotes,
+} from "@/lib/tripState";
 import {
   DndContext,
   PointerSensor,
@@ -74,38 +82,20 @@ function SortableActivityCard({ activity, notes, onEditNote, onClick }: Sortable
 
 export default function Home() {
   const [selectedDayId, setSelectedDayId] = useState(itinerary[0]?.id ?? "");
-  const mapFlyTo = useRef<{ flyTo: (lat: number, lng: number) => void; fitToPlaces: () => void } | null>(null);
+  const mapFlyTo = useRef<MapHandle | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const noteTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const [orderByDay, setOrderByDay] = useState<Record<string, string[]>>({});
-  const [notes, setNotes] = useState<Record<string, string[]>>({});
+  const [orderByDay, setOrderByDay] = useState<TripOrderState>({});
+  const [notes, setNotes] = useState<TripNotesState>({});
   const [editingNoteKey, setEditingNoteKey] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
 
   // Load persisted state from localStorage after mount to avoid SSR mismatch
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("asia-trip-order");
-      if (raw) setOrderByDay(JSON.parse(raw) as Record<string, string[]>);
-    } catch { /* ignore */ }
-    try {
-      const raw = localStorage.getItem("asia-trip-notes");
-      if (raw) {
-        const parsed = JSON.parse(raw) as Record<string, unknown>;
-        const migrated: Record<string, string[]> = {};
-        for (const [k, v] of Object.entries(parsed)) {
-          if (typeof v === "string") {
-            migrated[k] = v.trim() ? [v] : [];
-          } else if (Array.isArray(v)) {
-            migrated[k] = (v as unknown[]).filter((x): x is string => typeof x === "string");
-          } else {
-            migrated[k] = [];
-          }
-        }
-        setNotes(migrated);
-      }
-    } catch { /* ignore */ }
+    const { orderByDay, notes } = loadLocalTripState();
+    setOrderByDay(orderByDay);
+    setNotes(notes);
   }, []);
 
   useEffect(() => {
@@ -150,7 +140,7 @@ export default function Home() {
     const newOrder = arrayMove(orderedActivities, oldIndex, newIndex).map((a) => a.title);
     const updated = { ...orderByDay, [selectedDay.id]: newOrder };
     setOrderByDay(updated);
-    localStorage.setItem("asia-trip-order", JSON.stringify(updated));
+    saveLocalOrder(updated);
   }
 
   function openNoteEditor(activityTitle: string) {
@@ -167,7 +157,7 @@ export default function Home() {
     const current = notes[editingNoteKey] ?? [];
     const updated = { ...notes, [editingNoteKey]: [...current, trimmed] };
     setNotes(updated);
-    localStorage.setItem("asia-trip-notes", JSON.stringify(updated));
+    saveLocalNotes(updated);
     setNoteText("");
     window.setTimeout(() => {
       noteTextareaRef.current?.focus();
@@ -179,7 +169,7 @@ export default function Home() {
     const current = notes[editingNoteKey] ?? [];
     const updated = { ...notes, [editingNoteKey]: current.filter((_, i) => i !== index) };
     setNotes(updated);
-    localStorage.setItem("asia-trip-notes", JSON.stringify(updated));
+    saveLocalNotes(updated);
   }
 
   if (!selectedDay) {
