@@ -169,6 +169,9 @@ export default function Home() {
     setNotes(updated);
     localStorage.setItem("asia-trip-notes", JSON.stringify(updated));
     setNoteText("");
+    window.setTimeout(() => {
+      noteTextareaRef.current?.focus();
+    }, 0);
   }
 
   function deleteNote(index: number) {
@@ -299,7 +302,9 @@ export default function Home() {
                 behavior: "smooth",
                 block: "start",
               });
-              mapFlyTo.current?.fitToPlaces();
+              window.setTimeout(() => {
+                mapFlyTo.current?.fitToPlaces();
+              }, 250);
             }}
             className="rounded-full border border-[#f3c6c6] bg-[#ffecec] px-4 py-1 text-sm text-[#c96b6b]"
           >
