@@ -16,9 +16,14 @@ type Activity = {
   };
 };
 
+type MapHandle = {
+  flyTo: (lat: number, lng: number) => void;
+  fitToPlaces: () => void;
+};
+
 type DayMapProps = {
   places: Activity[];
-  flyToRef?: { current: ((lat: number, lng: number) => void) | null };
+  flyToRef?: { current: MapHandle | null };
 };
 
 const CITY_ZOOM = 14;
@@ -184,12 +189,29 @@ export default function DayMap({ places, flyToRef }: DayMapProps) {
     };
   }, []);
 
+  const validPointsRef = useRef(validPoints);
+  useEffect(() => { validPointsRef.current = validPoints; }, [validPoints]);
+
   useEffect(() => {
     if (!flyToRef) return;
-    flyToRef.current = (lat: number, lng: number) => {
-      if (!mapRef.current) return;
-      mapRef.current.stop();
-      mapRef.current.flyTo([lat, lng], CITY_ZOOM, { animate: true, duration: 0.8 });
+    flyToRef.current = {
+      flyTo: (lat: number, lng: number) => {
+        if (!mapRef.current) return;
+        mapRef.current.stop();
+        mapRef.current.flyTo([lat, lng], CITY_ZOOM, { animate: true, duration: 0.8 });
+      },
+      fitToPlaces: () => {
+        if (!mapRef.current) return;
+        const pts = validPointsRef.current;
+        if (pts.length === 0) return;
+        mapRef.current.stop();
+        if (pts.length === 1) {
+          mapRef.current.flyTo([pts[0].map!.lat, pts[0].map!.lng], CITY_ZOOM, { animate: true, duration: 0.8 });
+        } else {
+          const bounds = L.latLngBounds(pts.map((p) => [p.map!.lat, p.map!.lng] as [number, number]));
+          mapRef.current.fitBounds(bounds, { padding: [30, 30], maxZoom: 14, animate: true });
+        }
+      },
     };
     return () => { if (flyToRef) flyToRef.current = null; };
   }, [flyToRef]);

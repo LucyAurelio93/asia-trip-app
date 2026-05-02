@@ -31,12 +31,12 @@ const DayMap = dynamic(() => import("@/components/DayMap"), {
 
 type SortableProps = {
   activity: Activity;
-  note: string | undefined;
+  notes: string[];
   onEditNote: () => void;
   onClick?: () => void;
 };
 
-function SortableActivityCard({ activity, note, onEditNote, onClick }: SortableProps) {
+function SortableActivityCard({ activity, notes, onEditNote, onClick }: SortableProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: activity.title });
 
@@ -44,6 +44,13 @@ function SortableActivityCard({ activity, note, onEditNote, onClick }: SortableP
     transform: CSS.Transform.toString(transform) ?? undefined,
     transition: transition ?? undefined,
   };
+
+  const notePreview =
+    notes.length === 0
+      ? undefined
+      : notes.length === 1
+        ? notes[0]
+        : `${notes.length} notas personales`;
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
@@ -55,7 +62,7 @@ function SortableActivityCard({ activity, note, onEditNote, onClick }: SortableP
         image={activity.image}
         icon={activity.icon}
         onClick={onClick}
-        note={note}
+        note={notePreview}
         onEditNote={onEditNote}
         isDragging={isDragging}
       />
@@ -67,12 +74,12 @@ function SortableActivityCard({ activity, note, onEditNote, onClick }: SortableP
 
 export default function Home() {
   const [selectedDayId, setSelectedDayId] = useState(itinerary[0]?.id ?? "");
-  const mapFlyTo = useRef<((lat: number, lng: number) => void) | null>(null);
+  const mapFlyTo = useRef<{ flyTo: (lat: number, lng: number) => void; fitToPlaces: () => void } | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const noteTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [orderByDay, setOrderByDay] = useState<Record<string, string[]>>({});
-  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [notes, setNotes] = useState<Record<string, string[]>>({});
   const [editingNoteKey, setEditingNoteKey] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
 
@@ -84,7 +91,20 @@ export default function Home() {
     } catch { /* ignore */ }
     try {
       const raw = localStorage.getItem("asia-trip-notes");
-      if (raw) setNotes(JSON.parse(raw) as Record<string, string>);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        const migrated: Record<string, string[]> = {};
+        for (const [k, v] of Object.entries(parsed)) {
+          if (typeof v === "string") {
+            migrated[k] = v.trim() ? [v] : [];
+          } else if (Array.isArray(v)) {
+            migrated[k] = (v as unknown[]).filter((x): x is string => typeof x === "string");
+          } else {
+            migrated[k] = [];
+          }
+        }
+        setNotes(migrated);
+      }
     } catch { /* ignore */ }
   }, []);
 
@@ -137,15 +157,26 @@ export default function Home() {
     if (!selectedDay) return;
     const key = `${selectedDay.id}::${activityTitle}`;
     setEditingNoteKey(key);
-    setNoteText(notes[key] ?? "");
+    setNoteText("");
   }
 
-  function saveNote() {
+  function addNote() {
     if (!editingNoteKey) return;
-    const updated = { ...notes, [editingNoteKey]: noteText };
+    const trimmed = noteText.trim();
+    if (!trimmed) return;
+    const current = notes[editingNoteKey] ?? [];
+    const updated = { ...notes, [editingNoteKey]: [...current, trimmed] };
     setNotes(updated);
     localStorage.setItem("asia-trip-notes", JSON.stringify(updated));
-    setEditingNoteKey(null);
+    setNoteText("");
+  }
+
+  function deleteNote(index: number) {
+    if (!editingNoteKey) return;
+    const current = notes[editingNoteKey] ?? [];
+    const updated = { ...notes, [editingNoteKey]: current.filter((_, i) => i !== index) };
+    setNotes(updated);
+    localStorage.setItem("asia-trip-notes", JSON.stringify(updated));
   }
 
   if (!selectedDay) {
@@ -171,35 +202,50 @@ export default function Home() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="mb-3 text-base font-semibold text-[#2d2a26]">
-              Nota personal
+              Notas personales
             </h3>
             <textarea
-  ref={noteTextareaRef}
-  value={noteText}
-  onChange={(e) => setNoteText(e.target.value)}
-  onPointerDown={() => {
-    noteTextareaRef.current?.focus();
-  }}
-  onTouchStart={() => {
-    noteTextareaRef.current?.focus();
-  }}
-  placeholder="Toca aquí y escribe tu nota..."
-  className="w-full resize-none rounded-xl border border-[#e0d5cc] bg-[#fdf6f1] p-3 text-sm text-[#2d2a26] outline-none focus:border-[#c26d5a]"
-  rows={4}
-/>
+              ref={noteTextareaRef}
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              onPointerDown={() => { noteTextareaRef.current?.focus(); }}
+              onTouchStart={() => { noteTextareaRef.current?.focus(); }}
+              placeholder="Escribe una nueva nota..."
+              className="w-full resize-none rounded-xl border border-[#e0d5cc] bg-[#fdf6f1] p-3 text-sm text-[#2d2a26] outline-none focus:border-[#c26d5a]"
+              rows={3}
+            />
             <div className="mt-3 flex gap-2">
               <button
-                onClick={saveNote}
+                onClick={addNote}
                 className="flex-1 rounded-full bg-[#c26d5a] py-2 text-sm font-semibold text-white"
               >
-                Guardar
+                Agregar nota
               </button>
               <button
                 onClick={() => setEditingNoteKey(null)}
                 className="flex-1 rounded-full border border-[#e0d5cc] py-2 text-sm text-[#7a746f]"
               >
-                Cancelar
+                Cerrar
               </button>
+            </div>
+            <div className="mt-4">
+              {(notes[editingNoteKey] ?? []).length === 0 ? (
+                <p className="text-xs text-[#a09890]">Todavía no hay notas para esta actividad.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {(notes[editingNoteKey] ?? []).map((n, i) => (
+                    <li key={`${i}-${n}`} className="flex items-start gap-2 rounded-xl bg-[#fdf6f1] px-3 py-2">
+                      <span className="flex-1 text-sm text-[#2d2a26]">{n}</span>
+                      <button
+                        onClick={() => deleteNote(i)}
+                        className="shrink-0 text-xs text-[#c26d5a]"
+                      >
+                        Eliminar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
@@ -253,14 +299,7 @@ export default function Home() {
                 behavior: "smooth",
                 block: "start",
               });
-
-              const anchor =
-                orderedActivities.find((activity) => activity.icon === "hotel" && activity.map) ??
-                orderedActivities.find((activity) => activity.map);
-
-              if (anchor?.map && mapFlyTo.current) {
-                mapFlyTo.current(anchor.map.lat, anchor.map.lng);
-              }
+              mapFlyTo.current?.fitToPlaces();
             }}
             className="rounded-full border border-[#f3c6c6] bg-[#ffecec] px-4 py-1 text-sm text-[#c96b6b]"
           >
@@ -307,7 +346,7 @@ export default function Home() {
                 <SortableActivityCard
                   key={`${selectedDay.id}-${activity.title}`}
                   activity={activity}
-                  note={notes[`${selectedDay.id}::${activity.title}`]}
+                  notes={notes[`${selectedDay.id}::${activity.title}`] ?? []}
                   onEditNote={() => openNoteEditor(activity.title)}
                   onClick={
                     activity.map
@@ -316,7 +355,7 @@ export default function Home() {
                             behavior: "smooth",
                             block: "start",
                           });
-                          mapFlyTo.current?.(activity.map!.lat, activity.map!.lng);
+                          mapFlyTo.current?.flyTo(activity.map!.lat, activity.map!.lng);
                         }
                       : undefined
                   }
