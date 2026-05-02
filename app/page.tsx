@@ -14,7 +14,12 @@ import {
   loadLocalTripState,
   saveLocalOrder,
   saveLocalNotes,
+  normalizeOrder,
+  normalizeNotes,
 } from "@/lib/tripState";
+import { supabase } from "@/lib/supabase";
+
+const TRIP_ID = process.env.NEXT_PUBLIC_TRIP_ID ?? "asia-trip-2026";
 import {
   DndContext,
   PointerSensor,
@@ -91,11 +96,81 @@ export default function Home() {
   const [editingNoteKey, setEditingNoteKey] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
 
-  // Load persisted state from localStorage after mount to avoid SSR mismatch
+  const didLoadRef = useRef(false);
+  const orderByDayRef = useRef(orderByDay);
+  const notesRef = useRef(notes);
+  useEffect(() => { orderByDayRef.current = orderByDay; }, [orderByDay]);
+  useEffect(() => { notesRef.current = notes; }, [notes]);
+
+  async function saveRemoteState(nextOrder: TripOrderState, nextNotes: TripNotesState) {
+    const { error } = await supabase
+      .from("trip_state")
+      .upsert(
+        {
+          trip_id: TRIP_ID,
+          order_by_day: nextOrder,
+          notes: nextNotes,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "trip_id" }
+      );
+    if (error) console.warn("Supabase sync error:", error.message);
+  }
+
+  function persistOrder(updated: TripOrderState) {
+    setOrderByDay(updated);
+    saveLocalOrder(updated);
+    void saveRemoteState(updated, notesRef.current);
+  }
+
+  function persistNotes(updated: TripNotesState) {
+    setNotes(updated);
+    saveLocalNotes(updated);
+    void saveRemoteState(orderByDayRef.current, updated);
+  }
+
+  // Load persisted state: local first (no blocking), then sync from Supabase
   useEffect(() => {
-    const { orderByDay, notes } = loadLocalTripState();
-    setOrderByDay(orderByDay);
-    setNotes(notes);
+    if (didLoadRef.current) return;
+    didLoadRef.current = true;
+
+    const { orderByDay: localOrder, notes: localNotes } = loadLocalTripState();
+    setOrderByDay(localOrder);
+    setNotes(localNotes);
+
+    (async () => {
+      const { data, error } = await supabase
+        .from("trip_state")
+        .select("*")
+        .eq("trip_id", TRIP_ID)
+        .maybeSingle();
+
+      if (error) {
+        console.warn("Supabase load error:", error.message);
+        return;
+      }
+      if (!data) return;
+
+      const hasRemoteData =
+        (data.order_by_day &&
+          typeof data.order_by_day === "object" &&
+          !Array.isArray(data.order_by_day) &&
+          Object.keys(data.order_by_day).length > 0) ||
+        (data.notes &&
+          typeof data.notes === "object" &&
+          !Array.isArray(data.notes) &&
+          Object.keys(data.notes).length > 0);
+
+      if (!hasRemoteData) return;
+
+      const remoteOrder = normalizeOrder(data.order_by_day);
+      const remoteNotes = normalizeNotes(data.notes);
+
+      setOrderByDay(remoteOrder);
+      setNotes(remoteNotes);
+      saveLocalOrder(remoteOrder);
+      saveLocalNotes(remoteNotes);
+    })();
   }, []);
 
   useEffect(() => {
@@ -139,8 +214,7 @@ export default function Home() {
     if (oldIndex === -1 || newIndex === -1) return;
     const newOrder = arrayMove(orderedActivities, oldIndex, newIndex).map((a) => a.title);
     const updated = { ...orderByDay, [selectedDay.id]: newOrder };
-    setOrderByDay(updated);
-    saveLocalOrder(updated);
+    persistOrder(updated);
   }
 
   function openNoteEditor(activityTitle: string) {
@@ -156,8 +230,7 @@ export default function Home() {
     if (!trimmed) return;
     const current = notes[editingNoteKey] ?? [];
     const updated = { ...notes, [editingNoteKey]: [...current, trimmed] };
-    setNotes(updated);
-    saveLocalNotes(updated);
+    persistNotes(updated);
     setNoteText("");
     window.setTimeout(() => {
       noteTextareaRef.current?.focus();
@@ -168,8 +241,7 @@ export default function Home() {
     if (!editingNoteKey) return;
     const current = notes[editingNoteKey] ?? [];
     const updated = { ...notes, [editingNoteKey]: current.filter((_, i) => i !== index) };
-    setNotes(updated);
-    saveLocalNotes(updated);
+    persistNotes(updated);
   }
 
   if (!selectedDay) {
