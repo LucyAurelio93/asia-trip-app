@@ -309,9 +309,13 @@ export default function Home() {
                       <span className="flex-1 text-sm text-[#2d2a26]">{n}</span>
                       <button
                         onClick={() => deleteNote(i)}
-                        className="shrink-0 text-xs text-[#c26d5a]"
+                        className="inline-flex shrink-0 items-center justify-center rounded-full p-1"
                       >
-                        Eliminar
+                        <img
+                          src="/cats/aurelio-delete.png"
+                          alt="Eliminar nota"
+                          className="h-7 w-7 transition-transform duration-150 hover:scale-110"
+                        />
                       </button>
                     </li>
                   ))}

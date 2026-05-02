@@ -1,4 +1,3 @@
-import { MapPin, Pencil } from "lucide-react";
 import { activityIconMap } from "@/app/data/activityIcons";
 import type { ActivityIcon } from "@/app/data/itinerary";
 
@@ -69,10 +68,14 @@ export default function ActivityCard({
                 e.stopPropagation();
                 onEditNote();
               }}
-              className="inline-flex items-center justify-center rounded-full border border-[#e8ddd4] bg-[#fdf6f1] p-1.5 text-[#a0856e] hover:bg-[#f3e1d8]"
+              className="inline-flex items-center justify-center rounded-full border border-[#e8ddd4] bg-[#fdf6f1] p-1 hover:bg-[#f3e1d8]"
               title="Agregar nota"
             >
-              <Pencil size={12} />
+              <img
+                src="/cats/lucy-note.png"
+                alt="Agregar nota"
+                className="h-7 w-7 transition-transform duration-150 hover:scale-110"
+              />
             </button>
           )}
 
@@ -82,10 +85,13 @@ export default function ActivityCard({
             rel="noopener noreferrer"
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 rounded-full border border-[#ead7ff] bg-[#f8f0ff] px-3 py-1 text-xs font-semibold text-[#8b5fbf]"
+            className="inline-flex items-center justify-center rounded-full border border-[#ead7ff] bg-[#f8f0ff] p-1.5"
           >
-            <MapPin size={13} />
-            Ver en mapa
+            <img
+              src="/cats/aurelio-map.png"
+              alt="Abrir en Google Maps"
+              className="h-8 w-8 transition-transform duration-150 hover:scale-110"
+            />
           </a>
         </div>
       </div>
