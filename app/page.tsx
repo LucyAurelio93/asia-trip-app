@@ -14,7 +14,7 @@ const DayMap = dynamic(() => import("@/components/DayMap"), {
 export default function Home() {
   const [selectedDayId, setSelectedDayId] = useState(itinerary[0]?.id ?? "");
   const mapFlyTo = useRef<((lat: number, lng: number) => void) | null>(null);
-
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const selectedDay = useMemo(
     () => itinerary.find((day) => day.id === selectedDayId) ?? itinerary[0],
     [selectedDayId]
@@ -96,7 +96,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mt-4">
+        <div ref={mapContainerRef} className="mt-4">
           <DayMap
             places={selectedDay.activities.map((a) => ({
               title: a.title,
@@ -132,10 +132,20 @@ export default function Home() {
               image={activity.image}
               icon={activity.icon}
               onClick={
-                activity.map
-                  ? () => mapFlyTo.current?.(activity.map!.lat, activity.map!.lng)
-                  : undefined
-              }
+  activity.map
+    ? () => {
+        mapContainerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        mapFlyTo.current?.(
+          activity.map!.lat,
+          activity.map!.lng
+        );
+      }
+    : undefined
+}
             />
           ))}
         </div>
