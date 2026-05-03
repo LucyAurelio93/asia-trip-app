@@ -131,6 +131,46 @@ export default function Home() {
     void saveRemoteState(orderByDayRef.current, updated);
   }
 
+async function refreshRemoteState() {
+  const { data, error } = await supabase
+    .from("trip_state")
+    .select("*")
+    .eq("trip_id", TRIP_ID)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Supabase refresh error:", error.message);
+    return;
+  }
+
+  if (!data) return;
+
+  const hasRemoteData =
+    (data.order_by_day &&
+      typeof data.order_by_day === "object" &&
+      Object.keys(data.order_by_day).length > 0) ||
+    (data.notes &&
+      typeof data.notes === "object" &&
+      Object.keys(data.notes).length > 0);
+
+  if (!hasRemoteData) return;
+
+  const remoteOrder = migrateOrderToActivityIds(
+    normalizeOrder(data.order_by_day),
+    itinerary
+  );
+
+  const remoteNotes = migrateNotesToActivityIds(
+    normalizeNotes(data.notes),
+    itinerary
+  );
+
+  setOrderByDay(remoteOrder);
+  setNotes(remoteNotes);
+  saveLocalOrder(remoteOrder);
+  saveLocalNotes(remoteNotes);
+}
+
   // Load persisted state: local first (no blocking), then sync from Supabase
   useEffect(() => {
     if (didLoadRef.current) return;
@@ -345,8 +385,15 @@ export default function Home() {
             </h1>
 
             <div className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-[#f3d9c9] bg-white/85 px-4 py-1 text-sm text-[#7a4f3d] shadow-sm backdrop-blur">
-              📅 14 de mayo – 27 de mayo
-            </div>
+  <span>📅 14 de mayo – 27 de mayo</span>
+
+  <button
+    onClick={refreshRemoteState}
+    className="ml-2 rounded-full bg-[#ffecec] px-2 py-0.5 text-xs font-semibold text-[#c96b6b]"
+  >
+    ↻
+  </button>
+</div>
           </div>
         </div>
       </header>
