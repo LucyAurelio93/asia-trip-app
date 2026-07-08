@@ -25,6 +25,8 @@ const modules: ModuleCard[] = [
     emoji: "💰",
     title: "Finanzas",
     description: "Objetivos, DAP y vencimientos",
+    href: "/finanzas",
+    actionLabel: "Abrir finanzas",
   },
   {
     id: "gatos",
