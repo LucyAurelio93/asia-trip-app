@@ -64,10 +64,12 @@ export default function CajaTab({ caja, dispatch }: Props) {
         </div>
       </div>
 
-      <Card className="px-5 py-3">
+      <div>
         <SectionHeading>Movimientos recientes</SectionHeading>
-        <MovementList movements={caja.movimientos} />
-      </Card>
+        <Card className="px-5 py-2">
+          <MovementList movements={caja.movimientos} />
+        </Card>
+      </div>
 
       {/* Montados solo al abrir, para que los valores por defecto se recalculen */}
       {sheet === "aporte" ? (

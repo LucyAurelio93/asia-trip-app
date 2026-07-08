@@ -141,22 +141,33 @@ export default function FintualTab({ goals, dispatch }: Props) {
                     </div>
                     <p className="mt-1 text-xs text-[#6b727c]">
                       {vista === "mi"
-                        ? `Mi parte: ${formatCLP(bolsaDe(goal, YO))} depositado`
+                        ? `Total objetivo: ${formatCLP(goalDepositado(goal))}`
                         : `Depositado ${formatCLP(goalDepositado(goal))}`}
                     </p>
                   </div>
                   <ChevronRight size={18} className="shrink-0 text-[#4a505a]" />
                 </div>
-                <div className="mt-3 flex items-baseline justify-between">
-                  <p className="text-lg font-bold tabular-nums text-[#e9ebee]">
-                    {formatCLP(balance)}
-                  </p>
-                  <DeltaText
-                    value={goal.variacion}
-                    suffix={`(${formatPct(goalVariacionPct(goal))})`}
-                    className="text-xs font-semibold tabular-nums"
-                  />
-                </div>
+                {vista === "mi" ? (
+                  <div className="mt-3 flex items-baseline justify-between">
+                    <p className="text-lg font-bold tabular-nums text-[#e9ebee]">
+                      {formatCLP(bolsaDe(goal, YO))}
+                    </p>
+                    <span className="text-xs font-semibold text-[#6b727c]">
+                      Mi depositado
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex items-baseline justify-between">
+                    <p className="text-lg font-bold tabular-nums text-[#e9ebee]">
+                      {formatCLP(balance)}
+                    </p>
+                    <DeltaText
+                      value={goal.variacion}
+                      suffix={`(${formatPct(goalVariacionPct(goal))})`}
+                      className="text-xs font-semibold tabular-nums"
+                    />
+                  </div>
+                )}
               </button>
             );
           })}

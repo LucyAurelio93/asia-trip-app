@@ -7,6 +7,7 @@ import {
   dapDerived,
   formatCLP,
   formatDate,
+  formatTasa,
   todayISO,
   type Dap,
   type FinanceAction,
@@ -70,7 +71,7 @@ export default function DapTab({ daps, dispatch }: Props) {
                 <div>
                   <p className="text-base font-bold text-[#e9ebee]">{dap.banco}</p>
                   <p className="mt-0.5 text-xs text-[#8b929c]">
-                    {dap.titular} · {dap.dias} días · {String(dap.tasa).replace(".", ",")}%
+                    {dap.titular} · {dap.dias} días · {formatTasa(dap.tasa)}
                   </p>
                 </div>
                 <ChevronRight size={18} className="text-[#4a505a]" />
@@ -172,7 +173,7 @@ function DapDetail({
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
           <InfoItem label="Banco" value={dap.banco} />
           <InfoItem label="Titular" value={dap.titular} />
-          <InfoItem label="Tasa" value={`${String(dap.tasa).replace(".", ",")}% período`} />
+          <InfoItem label="Tasa del período" value={formatTasa(dap.tasa)} />
           <InfoItem label="Plazo" value={`${dap.dias} días`} />
           <InfoItem label="Última renovación" value={formatDate(dap.fechaRenovacion)} />
           <InfoItem
@@ -331,6 +332,10 @@ function RetirarSheet({
   return (
     <Sheet open title="Retirar del DAP" onClose={onClose}>
       <div className="space-y-4">
+        <p className="rounded-xl border border-[#1f242b] bg-[#0f1218] px-4 py-3 text-sm text-[#8b929c]">
+          El retiro reduce el capital vigente. La separación capital /
+          rentabilidad se recalcula automáticamente.
+        </p>
         <Field label="Fecha">
           <DateInput value={fecha} onChange={setFecha} />
         </Field>

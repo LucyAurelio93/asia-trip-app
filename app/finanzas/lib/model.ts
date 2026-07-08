@@ -119,6 +119,10 @@ export function formatPct(value: number): string {
   return `${value >= 0 ? "+" : ""}${s}%`;
 }
 
+export function formatTasa(value: number): string {
+  return `${String(value).replace(".", ",")}%`;
+}
+
 // ── Derivados DAP ────────────────────────────────────────────────────────────
 // La separación capital / rentabilidad es automática:
 //   valor actual   = valor al renovar + interés devengado (lineal por días)
@@ -275,7 +279,7 @@ export function financeReducer(
             amount: action.aporte,
             kind: "renovacion",
             label: `Renovación DAP ${dap.banco}`,
-            detail: `Nuevo total ${formatCLP(action.montoTotal)} · ${action.dias} días · ${action.tasa}%`,
+            detail: `Nuevo total ${formatCLP(action.montoTotal)} · ${action.dias} días · ${formatTasa(action.tasa)}`,
             module: "dap",
             sourceId: dap.id,
             sourceName: dap.banco,

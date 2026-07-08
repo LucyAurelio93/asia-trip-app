@@ -42,7 +42,7 @@ export default function ResumenTab({ state, onGoTo }: Props) {
     {
       tab: "caja" as const,
       label: "Caja casa",
-      sub: "Fondo para gastos extra",
+      sub: "Fondo acumulativo para gastos extra",
       value: state.caja.saldo,
       icon: <Wallet size={16} />,
     },
@@ -98,6 +98,26 @@ export default function ResumenTab({ state, onGoTo }: Props) {
         </Card>
       </div>
 
+      <div>
+        <SectionHeading
+          action={
+            <button
+              type="button"
+              onClick={() => onGoTo("historial")}
+              className="flex items-center gap-1 text-xs font-bold text-[#8b929c]"
+            >
+              <History size={13} />
+              Ver todo
+            </button>
+          }
+        >
+          Últimos movimientos
+        </SectionHeading>
+        <Card className="px-5 py-2">
+          <MovementList movements={recientes} showSource />
+        </Card>
+      </div>
+
       {proximo ? (
         <div>
           <SectionHeading>Próximo vencimiento DAP</SectionHeading>
@@ -125,26 +145,6 @@ export default function ResumenTab({ state, onGoTo }: Props) {
           </button>
         </div>
       ) : null}
-
-      <div>
-        <SectionHeading
-          action={
-            <button
-              type="button"
-              onClick={() => onGoTo("historial")}
-              className="flex items-center gap-1 text-xs font-bold text-[#8b929c]"
-            >
-              <History size={13} />
-              Ver todo
-            </button>
-          }
-        >
-          Últimos movimientos
-        </SectionHeading>
-        <Card className="px-5 py-1">
-          <MovementList movements={recientes} showSource />
-        </Card>
-      </div>
     </div>
   );
 }
