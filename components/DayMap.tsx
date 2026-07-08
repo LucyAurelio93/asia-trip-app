@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import { activityIconMap } from "@/app/data/activityIcons";
@@ -142,7 +142,7 @@ export default function DayMap({ places, flyToRef }: DayMapProps) {
   );
 
   // Captured once on mount — MapContainer ignores center prop changes after init.
-  const initialCenter = useRef<[number, number]>(
+  const [initialCenter] = useState<[number, number]>(() =>
     anchor ? [anchor.map!.lat, anchor.map!.lng] : [37.5665, 126.978]
   );
 
@@ -233,7 +233,7 @@ export default function DayMap({ places, flyToRef }: DayMapProps) {
     >
       <MapContainer
         ref={mapRef}
-        center={initialCenter.current}
+        center={initialCenter}
         zoom={CITY_ZOOM}
         className="h-full w-full"
         zoomControl={false}
