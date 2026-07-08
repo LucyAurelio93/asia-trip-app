@@ -1,493 +1,108 @@
-"use client";
+import Link from "next/link";
 
-import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
-import ActivityCard from "@/components/ActivityCard";
-import DaySelector from "@/components/DaySelector";
-import { itinerary } from "@/app/data/itinerary";
-import type { Activity } from "@/app/data/itinerary";
-import dynamic from "next/dynamic";
-import type { MapHandle } from "@/components/DayMap";
-import {
-  TripOrderState,
-  TripNotesState,
-  loadLocalTripState,
-  saveLocalOrder,
-  saveLocalNotes,
-  normalizeOrder,
-  normalizeNotes,
-  migrateOrderToActivityIds,
-  migrateNotesToActivityIds,
-} from "@/lib/tripState";
-import { supabase } from "@/lib/supabase";
+// ── Módulos del dashboard ────────────────────────────────────────────────────
 
-const TRIP_ID = process.env.NEXT_PUBLIC_TRIP_ID ?? "asia-trip-2026";
-import {
-  DndContext,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import type { DragEndEvent } from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-
-const DayMap = dynamic(() => import("@/components/DayMap"), {
-  ssr: false,
-});
-
-// ── SortableActivityCard ─────────────────────────────────────────────────────
-
-type SortableProps = {
-  activity: Activity;
-  notes: string[];
-  onEditNote: () => void;
-  onClick?: () => void;
+type ModuleCard = {
+  id: string;
+  emoji: string;
+  title: string;
+  description: string;
+  href?: string;
+  actionLabel?: string;
 };
 
-function SortableActivityCard({ activity, notes, onEditNote, onClick }: SortableProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: activity.id });
+const modules: ModuleCard[] = [
+  {
+    id: "viajes",
+    emoji: "✈️",
+    title: "Viajes",
+    description: "Asia Trip",
+    href: "/viajes",
+    actionLabel: "Abrir viaje",
+  },
+  {
+    id: "finanzas",
+    emoji: "💰",
+    title: "Finanzas",
+    description: "Objetivos, DAP y vencimientos",
+  },
+  {
+    id: "gatos",
+    emoji: "🐱",
+    title: "Gatos",
+    description: "Salud, controles y exámenes",
+  },
+  {
+    id: "casa",
+    emoji: "🏠",
+    title: "Casa",
+    description: "Compras, pendientes y reposición",
+  },
+];
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform) ?? undefined,
-    transition: transition ?? undefined,
-  };
+// ── Cards ────────────────────────────────────────────────────────────────────
 
-  const notePreview =
-    notes.length === 0
-      ? undefined
-      : notes.length === 1
-        ? notes[0]
-        : `${notes.length} notas personales`;
-
+function ActiveModuleCard({ module }: { module: ModuleCard }) {
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <ActivityCard
-        time={activity.time}
-        title={activity.title}
-        description={activity.description}
-        tag={activity.tag}
-        image={activity.image}
-        icon={activity.icon}
-        onClick={onClick}
-        note={notePreview}
-        onEditNote={onEditNote}
-        isDragging={isDragging}
-      />
+    <Link
+      href={module.href!}
+      className="block rounded-2xl border border-[#e8e2da] bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+    >
+      <div className="flex items-start gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#f6f1ea] text-2xl">
+          {module.emoji}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-bold text-[#2d2a26]">{module.title}</h2>
+          <p className="mt-0.5 text-sm text-[#7a746f]">{module.description}</p>
+          <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-[#2d2a26] px-4 py-1.5 text-sm font-semibold text-white">
+            {module.actionLabel} →
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function UpcomingModuleCard({ module }: { module: ModuleCard }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-[#e0d9d0] bg-white/60 p-5">
+      <div className="flex items-start gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#f6f1ea] text-2xl opacity-70">
+          {module.emoji}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-[#5b554f]">{module.title}</h2>
+            <span className="rounded-full bg-[#efe9e1] px-2.5 py-0.5 text-[11px] font-semibold text-[#8a827a]">
+              Próximamente
+            </span>
+          </div>
+          <p className="mt-0.5 text-sm text-[#9b938b]">{module.description}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
-// ── Home ─────────────────────────────────────────────────────────────────────
+// ── Dashboard Familiar ───────────────────────────────────────────────────────
 
-export default function Home() {
-  const [selectedDayId, setSelectedDayId] = useState(itinerary[0]?.id ?? "");
-  const mapFlyTo = useRef<MapHandle | null>(null);
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const noteTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const [orderByDay, setOrderByDay] = useState<TripOrderState>({});
-  const [notes, setNotes] = useState<TripNotesState>({});
-  const [editingNoteKey, setEditingNoteKey] = useState<string | null>(null);
-  const [noteText, setNoteText] = useState("");
-
-  const didLoadRef = useRef(false);
-  const orderByDayRef = useRef(orderByDay);
-  const notesRef = useRef(notes);
-  useEffect(() => { orderByDayRef.current = orderByDay; }, [orderByDay]);
-  useEffect(() => { notesRef.current = notes; }, [notes]);
-
-  async function saveRemoteState(nextOrder: TripOrderState, nextNotes: TripNotesState) {
-    const { error } = await supabase
-      .from("trip_state")
-      .upsert(
-        {
-          trip_id: TRIP_ID,
-          order_by_day: nextOrder,
-          notes: nextNotes,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "trip_id" }
-      );
-    if (error) console.warn("Supabase sync error:", error.message);
-  }
-
-  function persistOrder(updated: TripOrderState) {
-    setOrderByDay(updated);
-    saveLocalOrder(updated);
-    void saveRemoteState(updated, notesRef.current);
-  }
-
-  function persistNotes(updated: TripNotesState) {
-    setNotes(updated);
-    saveLocalNotes(updated);
-    void saveRemoteState(orderByDayRef.current, updated);
-  }
-
-async function refreshRemoteState() {
-  const { data, error } = await supabase
-    .from("trip_state")
-    .select("*")
-    .eq("trip_id", TRIP_ID)
-    .maybeSingle();
-
-  if (error) {
-    console.warn("Supabase refresh error:", error.message);
-    return;
-  }
-
-  if (!data) return;
-
-  const hasRemoteData =
-    (data.order_by_day &&
-      typeof data.order_by_day === "object" &&
-      Object.keys(data.order_by_day).length > 0) ||
-    (data.notes &&
-      typeof data.notes === "object" &&
-      Object.keys(data.notes).length > 0);
-
-  if (!hasRemoteData) return;
-
-  const remoteOrder = migrateOrderToActivityIds(
-    normalizeOrder(data.order_by_day),
-    itinerary
-  );
-
-  const remoteNotes = migrateNotesToActivityIds(
-    normalizeNotes(data.notes),
-    itinerary
-  );
-
-  setOrderByDay(remoteOrder);
-  setNotes(remoteNotes);
-  saveLocalOrder(remoteOrder);
-  saveLocalNotes(remoteNotes);
-}
-
-  // Load persisted state: local first (no blocking), then sync from Supabase
-  useEffect(() => {
-    if (didLoadRef.current) return;
-    didLoadRef.current = true;
-
-    const { orderByDay: localOrder, notes: localNotes } = loadLocalTripState();
-    const migratedOrder = migrateOrderToActivityIds(localOrder, itinerary);
-    const migratedNotes = migrateNotesToActivityIds(localNotes, itinerary);
-    setOrderByDay(migratedOrder);
-    setNotes(migratedNotes);
-    saveLocalOrder(migratedOrder);
-    saveLocalNotes(migratedNotes);
-
-    (async () => {
-      const { data, error } = await supabase
-        .from("trip_state")
-        .select("*")
-        .eq("trip_id", TRIP_ID)
-        .maybeSingle();
-
-      if (error) {
-        console.warn("Supabase load error:", error.message);
-        return;
-      }
-      if (!data) return;
-
-      const hasRemoteData =
-        (data.order_by_day &&
-          typeof data.order_by_day === "object" &&
-          !Array.isArray(data.order_by_day) &&
-          Object.keys(data.order_by_day).length > 0) ||
-        (data.notes &&
-          typeof data.notes === "object" &&
-          !Array.isArray(data.notes) &&
-          Object.keys(data.notes).length > 0);
-
-      if (!hasRemoteData) return;
-
-      const remoteOrder = migrateOrderToActivityIds(normalizeOrder(data.order_by_day), itinerary);
-      const remoteNotes = migrateNotesToActivityIds(normalizeNotes(data.notes), itinerary);
-
-      setOrderByDay(remoteOrder);
-      setNotes(remoteNotes);
-      saveLocalOrder(remoteOrder);
-      saveLocalNotes(remoteNotes);
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (!editingNoteKey) return;
-
-    const timer = window.setTimeout(() => {
-      noteTextareaRef.current?.focus();
-    }, 150);
-
-    return () => window.clearTimeout(timer);
-  }, [editingNoteKey]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { delay: 250, tolerance: 5 },
-    })
-  );
-
-  const selectedDay = useMemo(
-    () => itinerary.find((day) => day.id === selectedDayId) ?? itinerary[0],
-    [selectedDayId]
-  );
-
-  const orderedActivities = useMemo(() => {
-    if (!selectedDay) return [];
-    const savedOrder = orderByDay[selectedDay.id];
-    if (!savedOrder) return selectedDay.activities;
-    const orderMap = new Map(savedOrder.map((id, i) => [id, i]));
-    return [...selectedDay.activities].sort((a, b) => {
-      const ai = orderMap.get(a.id) ?? Infinity;
-      const bi = orderMap.get(b.id) ?? Infinity;
-      return ai - bi;
-    });
-  }, [selectedDay, orderByDay]);
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over || active.id === over.id || !selectedDay) return;
-    const oldIndex = orderedActivities.findIndex((a) => a.id === active.id);
-    const newIndex = orderedActivities.findIndex((a) => a.id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
-    const newOrder = arrayMove(orderedActivities, oldIndex, newIndex).map((a) => a.id);
-    const updated = { ...orderByDay, [selectedDay.id]: newOrder };
-    persistOrder(updated);
-  }
-
-  function openNoteEditor(activityId: string) {
-    if (!selectedDay) return;
-    const key = `${selectedDay.id}::${activityId}`;
-    setEditingNoteKey(key);
-    setNoteText("");
-  }
-
-  function addNote() {
-    if (!editingNoteKey) return;
-    const trimmed = noteText.trim();
-    if (!trimmed) return;
-    const current = notes[editingNoteKey] ?? [];
-    const updated = { ...notes, [editingNoteKey]: [...current, trimmed] };
-    persistNotes(updated);
-    setNoteText("");
-    window.setTimeout(() => {
-      noteTextareaRef.current?.focus();
-    }, 0);
-  }
-
-  function deleteNote(index: number) {
-    if (!editingNoteKey) return;
-    const current = notes[editingNoteKey] ?? [];
-    const updated = { ...notes, [editingNoteKey]: current.filter((_, i) => i !== index) };
-    persistNotes(updated);
-  }
-
-  if (!selectedDay) {
-    return (
-      <main className="mx-auto flex min-h-[100dvh] w-full max-w-[420px] items-center justify-center bg-[#FFF7F0] px-5 text-center text-[#3f2518]">
-        <p className="text-sm text-[#7a746f]">
-          El itinerario todavía no tiene actividades cargadas.
-        </p>
-      </main>
-    );
-  }
-
+export default function FamilyDashboard() {
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-[420px] overflow-hidden bg-[#FFF7F0] pb-28 text-[#3f2518]">
-      {/* NOTE EDITING MODAL */}
-      {editingNoteKey && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4"
-          onClick={() => setEditingNoteKey(null)}
-        >
-          <div
-            className="w-full max-w-[400px] rounded-2xl bg-white p-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="mb-3 text-base font-semibold text-[#2d2a26]">
-              Notas personales
-            </h3>
-            <textarea
-              ref={noteTextareaRef}
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              onPointerDown={() => { noteTextareaRef.current?.focus(); }}
-              onTouchStart={() => { noteTextareaRef.current?.focus(); }}
-              placeholder="Escribe una nueva nota..."
-              className="w-full resize-none rounded-xl border border-[#e0d5cc] bg-[#fdf6f1] p-3 text-sm text-[#2d2a26] outline-none focus:border-[#c26d5a]"
-              rows={3}
-            />
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={addNote}
-                className="flex-1 rounded-full bg-[#c26d5a] py-2 text-sm font-semibold text-white"
-              >
-                Agregar nota
-              </button>
-              <button
-                onClick={() => setEditingNoteKey(null)}
-                className="flex-1 rounded-full border border-[#e0d5cc] py-2 text-sm text-[#7a746f]"
-              >
-                Cerrar
-              </button>
-            </div>
-            <div className="mt-4">
-              {(notes[editingNoteKey] ?? []).length === 0 ? (
-                <p className="text-xs text-[#a09890]">Todavía no hay notas para esta actividad.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {(notes[editingNoteKey] ?? []).map((n, i) => (
-                    <li key={`${i}-${n}`} className="flex items-start gap-2 rounded-xl bg-[#fdf6f1] px-3 py-2">
-                      <span className="flex-1 text-sm text-[#2d2a26]">{n}</span>
-                      <button
-                        onClick={() => deleteNote(i)}
-                        className="inline-flex shrink-0 items-center justify-center rounded-full p-1"
-                      >
-                        <img
-                          src="/cats/aurelio-delete.png"
-                          alt="Eliminar nota"
-                          className="h-7 w-7 transition-transform duration-150 hover:scale-110"
-                        />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* HEADER */}
-      <header className="relative overflow-hidden bg-[#FFF7F0] pt-[env(safe-area-inset-top)]">
-        <div className="relative h-[300px] w-full overflow-hidden">
-          <Image
-            src="/cats-guide.png"
-            alt="Asia Trip"
-            fill
-            priority
-            className="object-cover object-center"
-          />
-
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-[#FFF7F0]" />
-
-          <div className="absolute inset-x-0 top-7 z-10 text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight text-[#3b2416] drop-shadow-sm">
-              Asia Trip
-            </h1>
-
-            <div className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-[#f3d9c9] bg-white/85 px-4 py-1 text-sm text-[#7a4f3d] shadow-sm backdrop-blur">
-  <span>📅 14 de mayo – 27 de mayo</span>
-
-  <button
-    onClick={refreshRemoteState}
-    className="ml-2 rounded-full bg-[#ffecec] px-2 py-0.5 text-xs font-semibold text-[#c96b6b]"
-  >
-    ↻
-  </button>
-</div>
-          </div>
-        </div>
+    <main className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-[#faf7f2] px-5 pb-12 text-[#2d2a26]">
+      <header className="pt-[calc(env(safe-area-inset-top)+2.5rem)]">
+        <h1 className="text-3xl font-extrabold tracking-tight">Familia</h1>
+        <p className="mt-1 text-sm text-[#7a746f]">Todo en un solo lugar</p>
       </header>
 
-      {/* CONTENIDO */}
-      <section className="-mt-6 rounded-t-[28px] bg-[#FFF7F0] px-5 pt-5">
-        <DaySelector
-          days={itinerary.map(({ id, label, city, date }) => ({
-            id,
-            label,
-            city,
-            dateLabel: date,
-            icon: "🌸",
-          }))}
-          selectedDayId={selectedDayId}
-          onSelectDay={setSelectedDayId}
-        />
-
-        <div className="mt-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Plan del {selectedDay.label}</h2>
-
-          <button
-            onClick={() => {
-              mapContainerRef.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-              window.setTimeout(() => {
-                mapFlyTo.current?.fitToPlaces();
-              }, 250);
-            }}
-            className="rounded-full border border-[#f3c6c6] bg-[#ffecec] px-4 py-1 text-sm text-[#c96b6b]"
-          >
-            Ver mapa
-          </button>
-        </div>
-
-        <div ref={mapContainerRef} className="mt-4">
-          <DayMap
-            places={orderedActivities.map((a) => ({
-              title: a.title,
-              time: a.time,
-              icon: a.icon,
-              map: a.map,
-            }))}
-            flyToRef={mapFlyTo}
-          />
-        </div>
-
-        <div
-          className="mt-5 space-y-4"
-          style={{
-            backgroundColor: "#fdf6f1",
-            backgroundImage: [
-              "linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(253,246,241,1))",
-              "radial-gradient(circle at 20% 20%, rgba(0,0,0,0.02) 1px, transparent 1px)",
-              "radial-gradient(circle at 80% 80%, rgba(0,0,0,0.02) 1px, transparent 1px)",
-            ].join(", "),
-            backgroundSize: "auto, 40px 40px, 40px 40px",
-            borderRadius: "16px",
-            padding: "12px 8px",
-          }}
-        >
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={orderedActivities.map((a) => a.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {orderedActivities.map((activity) => (
-                <SortableActivityCard
-                  key={`${selectedDay.id}-${activity.id}`}
-                  activity={activity}
-                  notes={notes[`${selectedDay.id}::${activity.id}`] ?? []}
-                  onEditNote={() => openNoteEditor(activity.id)}
-                  onClick={
-                    activity.map
-                      ? () => {
-                          mapContainerRef.current?.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
-                          mapFlyTo.current?.flyTo(activity.map!.lat, activity.map!.lng);
-                        }
-                      : undefined
-                  }
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
-        </div>
+      <section className="mt-8 space-y-4">
+        {modules.map((module) =>
+          module.href ? (
+            <ActiveModuleCard key={module.id} module={module} />
+          ) : (
+            <UpcomingModuleCard key={module.id} module={module} />
+          )
+        )}
       </section>
     </main>
   );
