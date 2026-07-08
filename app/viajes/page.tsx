@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ActivityCard from "@/components/ActivityCard";
 import DaySelector from "@/components/DaySelector";
@@ -378,6 +379,14 @@ async function refreshRemoteState() {
           />
 
           <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-[#FFF7F0]" />
+
+          <Link
+            href="/"
+            aria-label="Volver al Dashboard Familiar"
+            className="absolute left-4 top-7 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#f3d9c9] bg-white/85 text-lg text-[#7a4f3d] shadow-sm backdrop-blur transition-transform active:scale-95"
+          >
+            ←
+          </Link>
 
           <div className="absolute inset-x-0 top-7 z-10 text-center">
             <h1 className="text-4xl font-extrabold tracking-tight text-[#3b2416] drop-shadow-sm">
