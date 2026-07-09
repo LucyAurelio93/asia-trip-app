@@ -1,10 +1,10 @@
 "use client";
 
-import { useReducer, useState } from "react";
+import { useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, History, Landmark, LayoutGrid, TrendingUp, Wallet } from "lucide-react";
-import { financeReducer } from "../lib/model";
-import { initialFinanceState } from "../lib/mockData";
+import { financeReducer, projectFinanceState } from "../lib/model";
+import { initialFinanceStore } from "../lib/mockData";
 import CajaTab from "./CajaTab";
 import DapTab from "./DapTab";
 import FintualTab from "./FintualTab";
@@ -22,7 +22,9 @@ const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function FinanzasApp() {
-  const [state, dispatch] = useReducer(financeReducer, initialFinanceState);
+  // La verdad es el log de eventos (store); la UI consume la proyección.
+  const [store, dispatch] = useReducer(financeReducer, initialFinanceStore);
+  const state = useMemo(() => projectFinanceState(store), [store]);
   // Cada tab se remonta al cambiar (key), así los detalles abiertos se cierran
   // al navegar y cada sección parte en su vista raíz.
   const [tab, setTab] = useState<TabId>("resumen");
