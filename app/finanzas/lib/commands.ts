@@ -13,10 +13,12 @@ import type {
   UserId,
 } from "./types";
 
-// TEMPORAL: autor por defecto de todo evento nuevo mientras no hay login.
-// Al conectar Supabase Auth, este valor se reemplaza por el user derivado del
-// usuario autenticado (users.auth_user_id → users.id); es el único punto del
-// módulo que decide quién registra.
+// TEMPORAL: autor por defecto de todo evento nuevo. El login ya existe
+// (lib/auth/AuthProvider.tsx expone la sesión vía useAuth()), pero Finanzas
+// sigue sobre mocks. En la próxima fase, al conectar las tablas reales, este
+// valor se reemplaza resolviendo la cadena:
+//   session.user.id → users.auth_user_id → users.id → registradoPorUserId
+// Es el único punto del módulo que decide quién registra.
 const TEMP_ACTIVE_USER_ID: UserId = "user-piero";
 
 export type FinanceAction =
