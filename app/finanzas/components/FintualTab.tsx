@@ -5,9 +5,9 @@
 // muestran el error de la base si el insert fue rechazado (quedan abiertos)
 // y los balances mostrados nunca se adelantan a lo persistido.
 //
-// Los objetivos y sus bolsas se crean manualmente en Supabase (la creación
-// atómica desde la app llegará con una RPC en una migración futura): esta
-// tab solo registra depósitos, retiros y variaciones sobre bolsas existentes.
+// Los objetivos se crean desde esta tab vía conn.crearObjetivo (RPC atómica
+// create_fintual_goal: objetivo + bolsas en una sola transacción). Depósitos,
+// retiros y variaciones se registran solo sobre bolsas ya existentes.
 
 import { useState } from "react";
 import { ChevronRight, History } from "lucide-react";
@@ -25,6 +25,7 @@ import {
   type FintualWriteResult,
   type Person,
   type UseFintualResult,
+  type User,
 } from "../lib/model";
 import { useBackView } from "./backNav";
 import {
@@ -140,9 +141,14 @@ function useWriteFeedback() {
 }
 
 export default function FintualTab({ conn }: Props) {
-  const { status, errorCarga, goals, currentPerson, reload } = conn;
+  const { status, errorCarga, goals, users, currentPerson, guardando, reload, crearObjetivo } =
+    conn;
   const [vista, setVista] = useState<"grupo" | "mi">("grupo");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [creando, setCreando] = useState(false);
+  // Feedback de crearObjetivo: confirmación efímera o aviso persistente si el
+  // guardado pasó pero el refresco falló (mismo contrato que en GoalDetail).
+  const { notice, aviso, wrap } = useWriteFeedback();
 
   const selected = goals.find((g) => g.id === selectedId) ?? null;
   // El detalle abierto participa del Atrás global (ver backNav.tsx).
@@ -166,6 +172,9 @@ export default function FintualTab({ conn }: Props) {
     return (
       <div className="space-y-6">
         <FintualHeader />
+        {/* Si la escritura pasó pero el refresco falló, la vista cae aquí:
+            el aviso persistente aclara que NO hay que reintentar el guardado. */}
+        {aviso ? <WarningBanner text={aviso} /> : null}
         <Card className="space-y-4 p-6">
           <p className="text-sm text-[#f87171]">
             {errorCarga ??
@@ -181,18 +190,36 @@ export default function FintualTab({ conn }: Props) {
     return <GoalDetail goal={selected} conn={conn} onBack={() => setSelectedId(null)} />;
   }
 
-  // Estado vacío: aún no existe ningún objetivo en la base. Los objetivos se
-  // configuran directamente en Supabase, no desde la app.
+  // El sheet de creación se comparte entre el estado vacío y la lista; se
+  // monta solo al abrir para que el formulario arranque limpio cada vez.
+  const cerrarCrear = () => setCreando(false);
+  const crearSheet = creando ? (
+    <CrearObjetivoSheet
+      users={users}
+      currentPerson={currentPerson}
+      guardando={guardando}
+      onClose={cerrarCrear}
+      onSubmit={wrap(crearObjetivo, "Objetivo creado", cerrarCrear)}
+    />
+  ) : null;
+
+  // Estado vacío: aún no existe ningún objetivo en la base.
   if (goals.length === 0) {
     return (
       <div className="space-y-6">
         <FintualHeader />
-        <Card className="p-6 text-center">
+        {notice ? <NoticeBanner text={notice} /> : null}
+        {aviso ? <WarningBanner text={aviso} /> : null}
+        <Card className="space-y-4 p-6 text-center">
           <p className="text-sm text-[#8b929c]">
-            Todavía no hay objetivos configurados. Cuando existan en la base,
-            aparecerán aquí automáticamente.
+            Todavía no hay objetivos configurados. Crea el primero para empezar
+            a registrar depósitos, retiros y variaciones.
           </p>
+          <PrimaryButton disabled={guardando} onClick={() => setCreando(true)}>
+            Crear primer objetivo
+          </PrimaryButton>
         </Card>
+        {crearSheet}
       </div>
     );
   }
@@ -254,8 +281,24 @@ export default function FintualTab({ conn }: Props) {
         </HeroCard>
       )}
 
+      {notice ? <NoticeBanner text={notice} /> : null}
+      {aviso ? <WarningBanner text={aviso} /> : null}
+
       <div>
-        <SectionHeading>Objetivos</SectionHeading>
+        <SectionHeading
+          action={
+            <button
+              type="button"
+              onClick={() => setCreando(true)}
+              disabled={guardando}
+              className="rounded-full border border-[#23272f] bg-[#12151b] px-3 py-1 text-xs font-bold text-[#e9ebee] transition-transform active:scale-95 disabled:opacity-40"
+            >
+              Nuevo objetivo
+            </button>
+          }
+        >
+          Objetivos
+        </SectionHeading>
         <div className="space-y-3">
           {goals.map((goal) => {
             const balance = goalBalance(goal);
@@ -310,7 +353,93 @@ export default function FintualTab({ conn }: Props) {
           })}
         </div>
       </div>
+
+      {crearSheet}
     </div>
+  );
+}
+
+// ── Crear objetivo ───────────────────────────────────────────────────────────
+
+type CrearObjetivoInput = {
+  nombre: string;
+  tipo: "grupal" | "personal";
+  titular?: Person;
+};
+
+function CrearObjetivoSheet({
+  users,
+  currentPerson,
+  guardando,
+  onClose,
+  onSubmit,
+}: {
+  users: User[];
+  currentPerson: Person;
+  guardando: boolean;
+  onClose: () => void;
+  onSubmit: (input: CrearObjetivoInput) => Promise<string | null>;
+}) {
+  const [nombre, setNombre] = useState("");
+  const [tipo, setTipo] = useState<"grupal" | "personal">("grupal");
+  // El titular solo aplica a objetivos personales; parte en la persona
+  // autenticada, que siempre existe en users (el snapshot la validó al cargar).
+  const [titular, setTitular] = useState<Person>(currentPerson);
+  const { enviando, error, handle } = useSheetSubmit(onSubmit);
+
+  const valid = nombre.trim() !== "";
+
+  return (
+    <Sheet open title="Nuevo objetivo" onClose={onClose}>
+      <div className="space-y-4">
+        <Field label="Nombre">
+          <TextInput
+            value={nombre}
+            onChange={setNombre}
+            placeholder="Ej: Fondo de emergencia"
+          />
+        </Field>
+        <Field
+          label="Tipo"
+          hint={
+            tipo === "grupal"
+              ? "Se crea una bolsa por cada persona de la familia."
+              : "Se crea una sola bolsa a nombre del titular."
+          }
+        >
+          <PillToggle
+            options={[
+              { value: "grupal", label: "Grupal" },
+              { value: "personal", label: "Personal" },
+            ]}
+            value={tipo}
+            onChange={setTipo}
+          />
+        </Field>
+        {tipo === "personal" ? (
+          <Field label="Titular">
+            <PillToggle
+              options={users.map((u) => ({ value: u.nombre, label: u.nombre }))}
+              value={titular}
+              onChange={setTitular}
+            />
+          </Field>
+        ) : null}
+        <SheetError text={error} />
+        <PrimaryButton
+          disabled={!valid || enviando || guardando}
+          onClick={() =>
+            void handle({
+              nombre: nombre.trim(),
+              tipo,
+              titular: tipo === "personal" ? titular : undefined,
+            })
+          }
+        >
+          {enviando ? "Guardando…" : "Crear objetivo"}
+        </PrimaryButton>
+      </div>
+    </Sheet>
   );
 }
 

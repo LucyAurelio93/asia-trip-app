@@ -8,12 +8,12 @@
 // (projectGoal). Si la base rechaza la escritura, el estado local no cambia:
 // nunca se muestra un balance que la base no respalda. Sin optimistic updates.
 //
-// Los objetivos y sus bolsas se crean MANUALMENTE en Supabase (SQL Editor):
-// crear objetivo + bolsas de forma atómica exige una RPC transaccional que
-// llegará en una migración futura. Por eso aquí no hay crearObjetivo ni
-// creación de bolsas al vuelo: un depósito registra únicamente un depósito,
-// y si la estructura del objetivo está incompleta la operación se rechaza
-// con un mensaje de inconsistencia, sin escribir nada.
+// Los objetivos y sus bolsas se crean vía la RPC transaccional
+// public.create_fintual_goal (crearObjetivo): objetivo + bolsas nacen en una
+// sola transacción, nunca con inserts secuenciales desde el cliente. Fuera de
+// eso no hay creación de bolsas al vuelo: un depósito registra únicamente un
+// depósito, y si la estructura del objetivo está incompleta la operación se
+// rechaza con un mensaje de inconsistencia, sin escribir nada.
 //
 // Los comandos devuelven FintualWriteResult para distinguir tres desenlaces:
 //   null                                → guardado y vista refrescada
@@ -27,6 +27,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchCurrentAppUserId, listUsers } from "./cajaData";
 import {
+  createFintualGoal,
   insertFintualDeposito,
   insertFintualRetiro,
   insertFintualVariacion,
@@ -41,6 +42,7 @@ import type {
   FintualGoalRecord,
   Person,
   User,
+  UserId,
 } from "./types";
 
 export type FintualStatus = "cargando" | "error" | "listo";
@@ -54,6 +56,11 @@ export type UseFintualResult = {
   /** Objetivos proyectados desde los eventos guardados (vista de derive.ts). */
   goals: FintualGoal[];
   /**
+   * Usuarios de la familia según el snapshot cargado (para elegir el titular
+   * de un objetivo personal). Vacío mientras carga o en error.
+   */
+  users: User[];
+  /**
    * Persona autenticada ("Mi parte" de la UI), resuelta al cargar el snapshot
    * vía public.current_app_user_id(). null mientras carga o en error; una
    * sesión no vinculada deja el hook en "error", nunca en un $0 silencioso.
@@ -62,6 +69,11 @@ export type UseFintualResult = {
   /** true mientras una escritura está en curso (bloquea los formularios). */
   guardando: boolean;
   reload: () => void;
+  crearObjetivo: (input: {
+    nombre: string;
+    tipo: "grupal" | "personal";
+    titular?: Person;
+  }) => Promise<FintualWriteResult>;
   registrarDeposito: (input: {
     goalId: string;
     person: Person;
@@ -249,6 +261,35 @@ export function useFintual(): UseFintualResult {
     [goalRecords, users, bags]
   );
 
+  // Crea objetivo + bolsas en una sola transacción (RPC create_fintual_goal).
+  // Valida ANTES del roundtrip: nombre no vacío y, si es personal, un titular
+  // que exista en los usuarios cargados. Cualquier rechazo sale como
+  // { guardado: false } sin tocar la base.
+  const crearObjetivo = useCallback(
+    (input: { nombre: string; tipo: "grupal" | "personal"; titular?: Person }) =>
+      write(async () => {
+        const nombre = input.nombre.trim();
+        if (!nombre) {
+          throw new Error("El nombre del objetivo no puede estar vacío.");
+        }
+        let titularUserId: UserId | undefined;
+        if (input.tipo === "personal") {
+          if (!input.titular) {
+            throw new Error("Un objetivo personal necesita un titular.");
+          }
+          const titular = users.find((u) => u.nombre === input.titular);
+          if (!titular) {
+            throw new Error(
+              `No existe el usuario "${input.titular}" en la base.`
+            );
+          }
+          titularUserId = titular.id;
+        }
+        await createFintualGoal({ nombre, tipo: input.tipo, titularUserId });
+      }),
+    [write, users]
+  );
+
   const registrarDeposito = useCallback(
     (input: {
       goalId: string;
@@ -323,9 +364,11 @@ export function useFintual(): UseFintualResult {
     status,
     errorCarga,
     goals,
+    users,
     currentPerson,
     guardando,
     reload,
+    crearObjetivo,
     registrarDeposito,
     registrarRetiro,
     registrarVariacion,

@@ -6,10 +6,10 @@
 //   * Cada función es UNA operación (select / insert), sin lógica de UI.
 //   * Solo lectura e inserción: el historial es append-only (RLS no permite
 //     UPDATE ni DELETE desde el cliente).
-//   * Objetivos y bolsas son SOLO LECTURA desde la app: se crean manualmente
-//     en Supabase. Crear objetivo + bolsas exige una transacción (RPC) que
-//     este esquema aún no tiene; hasta esa migración, la app no inserta en
-//     fintual_goals ni fintual_goal_bags para no dejar estados a medias.
+//   * Objetivos y bolsas se crean SOLO vía la RPC transaccional
+//     public.create_fintual_goal (objetivo + bolsas en una transacción).
+//     Esta capa nunca inserta directo en fintual_goals ni fintual_goal_bags
+//     para no dejar estados a medias.
 //   * El autor se resuelve con public.current_app_user_id()
 //     (auth.uid() → users.auth_user_id → users.id); RLS rechaza cualquier
 //     evento cuyo registrado_por_user_id no sea el usuario de la sesión.
@@ -181,6 +181,36 @@ export async function listFintualEvents(): Promise<FintualEvent[]> {
     .order("id", { ascending: true });
   if (error) fail("cargar los movimientos de Fintual", error.message);
   return ((data ?? []) as FintualEventRow[]).map(toFintualEvent);
+}
+
+// ── Creación de objetivos (RPC transaccional) ────────────────────────────────
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Crea objetivo + bolsas de forma atómica vía public.create_fintual_goal:
+// grupal crea una bolsa por usuario, personal solo la del titular. Devuelve
+// el uuid del objetivo creado; si la RPC no responde un uuid válido se aborta
+// con error en vez de devolver un id inservible.
+export async function createFintualGoal(input: {
+  nombre: string;
+  tipo: "grupal" | "personal";
+  titularUserId?: UserId;
+}): Promise<string> {
+  const { data, error } = await supabase.rpc("create_fintual_goal", {
+    p_nombre: input.nombre,
+    p_tipo: input.tipo,
+    p_titular_user_id:
+      input.tipo === "personal" ? input.titularUserId ?? null : null,
+  });
+  if (error) fail("crear el objetivo", error.message);
+  if (typeof data !== "string" || !UUID_RE.test(data)) {
+    fail(
+      "crear el objetivo",
+      `la RPC no devolvió un uuid válido: ${JSON.stringify(data)}`
+    );
+  }
+  return data;
 }
 
 // ── Escrituras (solo INSERT de eventos, nunca UPDATE/DELETE) ─────────────────
