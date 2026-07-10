@@ -1,11 +1,14 @@
-// Comandos del módulo Finanzas: CÓMO SE REGISTRA.
+// Comandos del módulo Finanzas: CÓMO SE REGISTRA (solo DAP y Fintual).
 //
 // Cada acción de la UI se traduce en agregar UN evento al store. Los comandos
 // nunca escriben saldos ni totales: eso se deriva en derive.ts. Este reducer
 // es el punto que mañana se reemplaza por inserts a Supabase (mismas filas).
+//
+// Caja YA NO pasa por aquí: sus eventos se insertan en Supabase vía
+// cajaData.ts/useCaja.ts, con autor real de la sesión. Este reducer queda
+// solo para DAP y Fintual mientras sigan sobre mocks.
 
 import type {
-  CashBoxEvent,
   DapEvent,
   FinanceStore,
   FintualEvent,
@@ -13,12 +16,11 @@ import type {
   UserId,
 } from "./types";
 
-// TEMPORAL: autor por defecto de todo evento nuevo. El login ya existe
-// (lib/auth/AuthProvider.tsx expone la sesión vía useAuth()), pero Finanzas
-// sigue sobre mocks. En la próxima fase, al conectar las tablas reales, este
-// valor se reemplaza resolviendo la cadena:
+// TEMPORAL: autor por defecto de los eventos mock de DAP y Fintual. El login
+// ya existe (lib/auth/AuthProvider.tsx) y Caja ya resuelve el autor real con
+// public.current_app_user_id() (ver useCaja.ts). Al conectar DAP y Fintual a
+// las tablas reales, este valor desaparece resolviendo la misma cadena:
 //   session.user.id → users.auth_user_id → users.id → registradoPorUserId
-// Es el único punto del módulo que decide quién registra.
 const TEMP_ACTIVE_USER_ID: UserId = "user-piero";
 
 export type FinanceAction =
@@ -47,10 +49,7 @@ export type FinanceAction =
       monto: number;
       nota?: string;
     }
-  | { type: "fintual/variacion"; goalId: string; fecha: string; nuevaVariacion: number }
-  | { type: "caja/aporte"; fecha: string; monto: number; nota?: string }
-  | { type: "caja/gasto"; fecha: string; monto: number; descripcion: string }
-  | { type: "caja/ajuste"; fecha: string; nuevoSaldo: number; nota?: string };
+  | { type: "fintual/variacion"; goalId: string; fecha: string; nuevaVariacion: number };
 
 function makeId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -80,17 +79,6 @@ function ensureBag(
   }
 
   return { users, fintualGoalBags, bagId: bag.id };
-}
-
-// La UI actual opera sobre una única caja ("Caja casa"): los comandos de caja
-// aplican sobre la primera, creándola si el store partiera vacío.
-function ensureCaja(
-  store: FinanceStore
-): Pick<FinanceStore, "cashBoxes"> & { boxId: string } {
-  const box = store.cashBoxes[0];
-  if (box) return { cashBoxes: store.cashBoxes, boxId: box.id };
-  const nueva = { id: makeId(), nombre: "Caja casa" };
-  return { cashBoxes: [nueva], boxId: nueva.id };
 }
 
 export function financeReducer(
@@ -161,48 +149,6 @@ export function financeReducer(
         registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return { ...store, fintualEvents: [...store.fintualEvents, event] };
-    }
-
-    case "caja/aporte": {
-      const { cashBoxes, boxId } = ensureCaja(store);
-      const event: CashBoxEvent = {
-        id: makeId(),
-        boxId,
-        fecha: action.fecha,
-        tipo: "aporte",
-        monto: action.monto,
-        nota: action.nota || undefined,
-        registradoPorUserId: TEMP_ACTIVE_USER_ID,
-      };
-      return { ...store, cashBoxes, cashBoxEvents: [...store.cashBoxEvents, event] };
-    }
-
-    case "caja/gasto": {
-      const { cashBoxes, boxId } = ensureCaja(store);
-      const event: CashBoxEvent = {
-        id: makeId(),
-        boxId,
-        fecha: action.fecha,
-        tipo: "gasto",
-        monto: action.monto,
-        descripcion: action.descripcion,
-        registradoPorUserId: TEMP_ACTIVE_USER_ID,
-      };
-      return { ...store, cashBoxes, cashBoxEvents: [...store.cashBoxEvents, event] };
-    }
-
-    case "caja/ajuste": {
-      const { cashBoxes, boxId } = ensureCaja(store);
-      const event: CashBoxEvent = {
-        id: makeId(),
-        boxId,
-        fecha: action.fecha,
-        tipo: "ajuste",
-        nuevoSaldo: action.nuevoSaldo,
-        nota: action.nota || undefined,
-        registradoPorUserId: TEMP_ACTIVE_USER_ID,
-      };
-      return { ...store, cashBoxes, cashBoxEvents: [...store.cashBoxEvents, event] };
     }
   }
 }

@@ -312,7 +312,9 @@ function projectGoal(
   };
 }
 
-function projectCaja(
+// Exportada: Caja ya se proyecta desde filas reales de Supabase (useCaja.ts),
+// no solo desde el store mock de projectFinanceState.
+export function projectCaja(
   box: CashBoxRecord,
   events: CashBoxEvent[],
   users: User[]

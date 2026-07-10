@@ -9,17 +9,30 @@ import {
   proximoVencimiento,
   totalDap,
   totalFintual,
+  type CajaStatus,
   type FinanceState,
 } from "../lib/model";
 import type { TabId } from "./FinanzasApp";
-import { Card, HeroCard, MovementList, SectionHeading, SectionLabel } from "./ui";
+import {
+  Card,
+  GhostButton,
+  HeroCard,
+  MovementList,
+  SectionHeading,
+  SectionLabel,
+} from "./ui";
 
 type Props = {
   state: FinanceState;
+  // Estado de la carga de Caja (Supabase). Mientras no sea "listo",
+  // state.caja es la proyección vacía y NO puede sumarse como si fuera $0.
+  cajaStatus: CajaStatus;
+  onReloadCaja: () => void;
   onGoTo: (tab: TabId) => void;
 };
 
-export default function ResumenTab({ state, onGoTo }: Props) {
+export default function ResumenTab({ state, cajaStatus, onReloadCaja, onGoTo }: Props) {
+  const cajaLista = cajaStatus === "listo";
   const total = patrimonio(state);
   const proximo = proximoVencimiento(state.daps);
   const recientes = allMovements(state).slice(0, 5);
@@ -29,21 +42,26 @@ export default function ResumenTab({ state, onGoTo }: Props) {
       tab: "dap" as const,
       label: "DAP",
       sub: `${state.daps.length} depósitos a plazo`,
-      value: totalDap(state.daps),
+      value: totalDap(state.daps) as number | null,
       icon: <Landmark size={16} />,
     },
     {
       tab: "fintual" as const,
       label: "Fintual",
       sub: `${state.fintual.length} objetivos`,
-      value: totalFintual(state.fintual),
+      value: totalFintual(state.fintual) as number | null,
       icon: <TrendingUp size={16} />,
     },
     {
       tab: "caja" as const,
       label: "Caja casa",
-      sub: "Fondo acumulativo para gastos extra",
-      value: state.caja.saldo,
+      sub: cajaLista
+        ? "Fondo acumulativo para gastos extra"
+        : cajaStatus === "cargando"
+          ? "Cargando desde Supabase…"
+          : "No se pudo cargar",
+      // null = saldo aún no disponible: se muestra un placeholder, nunca $0.
+      value: cajaLista ? state.caja.saldo : null,
       icon: <Wallet size={16} />,
     },
   ];
@@ -57,11 +75,23 @@ export default function ResumenTab({ state, onGoTo }: Props) {
 
       <HeroCard className="p-6">
         <SectionLabel>Patrimonio familiar</SectionLabel>
-        <p className="mt-2 text-[2.75rem] font-bold leading-none tracking-tight text-[#e9ebee]">
-          {formatCLP(total)}
-        </p>
+        {cajaLista ? (
+          <p className="mt-2 text-[2.75rem] font-bold leading-none tracking-tight text-[#e9ebee]">
+            {formatCLP(total)}
+          </p>
+        ) : cajaStatus === "cargando" ? (
+          <p className="mt-3 text-sm text-[#8b929c]">Cargando datos de Caja…</p>
+        ) : (
+          <div className="mt-3 space-y-4">
+            <p className="text-sm text-[#f87171]">
+              El patrimonio total no puede calcularse completamente: los datos
+              de Caja no se pudieron cargar.
+            </p>
+            <GhostButton onClick={onReloadCaja}>Reintentar</GhostButton>
+          </div>
+        )}
         <p className="mt-3 text-xs text-[#6b727c]">
-          DAP + Fintual + Caja casa · datos locales
+          DAP y Fintual: datos de prueba · Caja casa: datos reales
         </p>
       </HeroCard>
 
@@ -87,8 +117,12 @@ export default function ResumenTab({ state, onGoTo }: Props) {
                       {item.sub}
                     </span>
                   </span>
-                  <span className="shrink-0 text-sm font-bold tabular-nums text-[#e9ebee]">
-                    {formatCLP(item.value)}
+                  <span
+                    className={`shrink-0 text-sm font-bold tabular-nums ${
+                      item.value !== null ? "text-[#e9ebee]" : "text-[#6b727c]"
+                    }`}
+                  >
+                    {item.value !== null ? formatCLP(item.value) : "—"}
                   </span>
                   <ChevronRight size={16} className="shrink-0 text-[#4a505a]" />
                 </button>
@@ -114,6 +148,13 @@ export default function ResumenTab({ state, onGoTo }: Props) {
           Últimos movimientos
         </SectionHeading>
         <Card className="px-5 py-2">
+          {!cajaLista ? (
+            <p className="border-b border-[#1a1e25] py-3 text-xs text-[#8b929c]">
+              {cajaStatus === "cargando"
+                ? "Los movimientos de Caja aún se están cargando y no aparecen aquí."
+                : "Los movimientos de Caja no se pudieron cargar: esta lista está incompleta."}
+            </p>
+          ) : null}
           <MovementList movements={recientes} showSource />
         </Card>
       </div>

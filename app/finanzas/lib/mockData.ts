@@ -278,54 +278,10 @@ export const initialFinanceStore: FinanceStore = {
     },
   ],
 
-  cashBoxes: [{ id: "caja-casa", nombre: "Caja casa" }],
+  // Caja ya persiste en Supabase (cajaData.ts/useCaja.ts): sus mocks se
+  // retiraron para no mezclar eventos mock con eventos reales en Resumen ni
+  // en Historial. DAP y Fintual siguen sobre los mocks de arriba.
+  cashBoxes: [],
 
-  cashBoxEvents: [
-    // Saldo derivado: 500.000 − 135.000 + 500.000 − 85.000 − 42.500 = 737.500
-    {
-      id: "cj-e1",
-      boxId: "caja-casa",
-      fecha: "2026-06-01",
-      tipo: "aporte",
-      monto: 500_000,
-      nota: "Aporte mensual",
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "cj-e2",
-      boxId: "caja-casa",
-      fecha: "2026-06-14",
-      tipo: "gasto",
-      monto: 135_000,
-      descripcion: "Reparación lavadora",
-      registradoPorUserId: "user-consu",
-    },
-    {
-      id: "cj-e3",
-      boxId: "caja-casa",
-      fecha: "2026-07-01",
-      tipo: "aporte",
-      monto: 500_000,
-      nota: "Aporte mensual",
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "cj-e4",
-      boxId: "caja-casa",
-      fecha: "2026-07-03",
-      tipo: "gasto",
-      monto: 85_000,
-      descripcion: "Gásfiter baño",
-      registradoPorUserId: "user-consu",
-    },
-    {
-      id: "cj-e5",
-      boxId: "caja-casa",
-      fecha: "2026-07-05",
-      tipo: "gasto",
-      monto: 42_500,
-      descripcion: "Ferretería",
-      registradoPorUserId: "user-piero",
-    },
-  ],
+  cashBoxEvents: [],
 };

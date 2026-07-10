@@ -12,6 +12,7 @@ import {
   type Dap,
   type FinanceAction,
 } from "../lib/model";
+import { useBackView } from "./backNav";
 import EvolutionChart from "./EvolutionChart";
 import {
   BackHeader,
@@ -39,6 +40,8 @@ type Props = {
 export default function DapTab({ daps, dispatch }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = daps.find((d) => d.id === selectedId) ?? null;
+  // El detalle abierto participa del Atrás global (ver backNav.tsx).
+  useBackView(selected !== null, () => setSelectedId(null));
 
   if (selected) {
     return (
@@ -112,6 +115,9 @@ function DapDetail({
   const [showHistory, setShowHistory] = useState(false);
   const [sheet, setSheet] = useState<"renovar" | "retirar" | null>(null);
   const der = dapDerived(dap);
+  // El historial del DAP es un nivel más profundo que el detalle; los sheets
+  // se registran solos (ver Sheet en ui.tsx) como el nivel más profundo.
+  useBackView(showHistory, () => setShowHistory(false));
 
   if (showHistory) {
     return (

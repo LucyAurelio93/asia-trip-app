@@ -8,6 +8,7 @@ import {
   formatSignedCLP,
   type Movement,
 } from "../lib/model";
+import { useBackView } from "./backNav";
 
 // Primitivas visuales del módulo Finanzas.
 // Tokens: fondo #0c0e12 · card #12151b · bordes #23272f/#1f242b
@@ -155,16 +156,19 @@ export function GhostButton({
   children,
   onClick,
   danger,
+  disabled,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   danger?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl border text-sm font-bold transition-transform active:scale-[0.98] ${
+      disabled={disabled}
+      className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl border text-sm font-bold transition-transform active:scale-[0.98] disabled:opacity-40 ${
         danger
           ? "border-[#3a2429] bg-[#1a1216] text-[#f87171]"
           : "border-[#23272f] bg-[#12151b] text-[#e9ebee]"
@@ -344,6 +348,12 @@ export function Sheet({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  // Mientras está abierto, el sheet es el nivel más profundo de la pila del
+  // Atrás global (ver backNav.tsx): Atrás lo cierra a él y solo a él. X,
+  // backdrop y confirmar siguen cerrando por su cuenta; al cerrarse o
+  // desmontarse la entrada se elimina sola.
+  useBackView(open, onClose);
+
   // Evita el scroll del fondo mientras el sheet está abierto.
   useEffect(() => {
     if (!open) return;

@@ -16,6 +16,7 @@ import {
   type FintualGoal,
   type Person,
 } from "../lib/model";
+import { useBackView } from "./backNav";
 import {
   BackHeader,
   Card,
@@ -45,6 +46,8 @@ export default function FintualTab({ goals, dispatch }: Props) {
   const [vista, setVista] = useState<"grupo" | "mi">("grupo");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = goals.find((g) => g.id === selectedId) ?? null;
+  // El detalle abierto participa del Atrás global (ver backNav.tsx).
+  useBackView(selected !== null, () => setSelectedId(null));
 
   if (selected) {
     return (
@@ -192,6 +195,9 @@ function GoalDetail({
 }) {
   const [showHistory, setShowHistory] = useState(false);
   const [sheet, setSheet] = useState<GoalSheet | null>(null);
+  // El historial del objetivo es un nivel más profundo que el detalle; los
+  // sheets se registran solos (ver Sheet en ui.tsx) como el nivel más profundo.
+  useBackView(showHistory, () => setShowHistory(false));
 
   const depositado = goalDepositado(goal);
   const balance = goalBalance(goal);

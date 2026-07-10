@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
-import { allMovements, type FinanceState, type ModuleId } from "../lib/model";
+import {
+  allMovements,
+  type CajaStatus,
+  type FinanceState,
+  type ModuleId,
+} from "../lib/model";
 import { Card, MovementList, useMockNotice } from "./ui";
 
 // Historial global: todos los movimientos de DAP, Fintual y Caja.
 // Los historiales individuales viven dentro de cada DAP / objetivo Fintual.
+// Mientras Caja (Supabase) no esté lista, el combinado es INCOMPLETO y se
+// advierte de forma explícita: DAP/Fintual mock se muestran igual.
 
 type Filter = "todos" | ModuleId;
 
@@ -17,7 +24,13 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "caja", label: "Caja" },
 ];
 
-export default function HistorialTab({ state }: { state: FinanceState }) {
+export default function HistorialTab({
+  state,
+  cajaStatus,
+}: {
+  state: FinanceState;
+  cajaStatus: CajaStatus;
+}) {
   const [filter, setFilter] = useState<Filter>("todos");
   const [notice, setNotice] = useMockNotice();
 
@@ -73,6 +86,20 @@ export default function HistorialTab({ state }: { state: FinanceState }) {
       {notice ? (
         <p className="rounded-xl border border-[#1f242b] bg-[#0f1218] px-4 py-3 text-center text-xs text-[#8b929c]">
           {notice}
+        </p>
+      ) : null}
+
+      {cajaStatus === "cargando" ? (
+        <p className="rounded-xl border border-[#1f242b] bg-[#0f1218] px-4 py-3 text-xs text-[#8b929c]">
+          Los movimientos de Caja aún se están cargando: este historial todavía
+          no los incluye.
+        </p>
+      ) : null}
+      {cajaStatus === "error" ? (
+        <p className="rounded-xl border border-[#3a2429] bg-[#1a1216] px-4 py-3 text-xs text-[#f87171]">
+          No se pudieron cargar los movimientos de Caja: este historial está
+          incompleto (solo muestra DAP y Fintual). Reintenta desde la pestaña
+          Caja o Resumen.
         </p>
       ) : null}
 
