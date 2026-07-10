@@ -22,6 +22,12 @@
 
 alter table public.trip_state enable row level security;
 
+-- Confirmado en Supabase: existe una política permisiva "allow all trip_state"
+-- (ALL, roles public, qual true). Las políticas permisivas se combinan con OR,
+-- así que si no se elimina, anon seguiría con acceso total aunque se creen las
+-- políticas para authenticated. Debe caer ANTES de crear las nuevas.
+drop policy if exists "allow all trip_state" on public.trip_state;
+
 -- Lectura para cualquier sesión autenticada (Piero y Consu comparten el viaje).
 drop policy if exists trip_state_select on public.trip_state;
 create policy trip_state_select on public.trip_state
