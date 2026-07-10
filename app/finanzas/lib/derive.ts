@@ -61,7 +61,8 @@ export type Movement = {
   module: ModuleId;
   sourceId?: string;
   sourceName: string;
-  person?: Person;
+  person?: Person; // dueño de la bolsa Fintual (no es el autor del registro)
+  registradoPor: Person; // quién registró el evento (types.ts: registradoPorUserId)
 };
 
 export type Snapshot = { date: string; value: number };
@@ -143,6 +144,7 @@ function projectDap(record: DapRecord, events: DapEvent[], users: User[]): Dap {
       module: "dap",
       sourceId: record.id,
       sourceName: record.banco,
+      registradoPor: personOf(users, ev.registradoPorUserId),
     });
   };
 
@@ -251,6 +253,7 @@ function projectGoal(
           sourceId: record.id,
           sourceName: record.nombre,
           person: personPorBolsa.get(ev.bagId),
+          registradoPor: personOf(users, ev.registradoPorUserId),
         });
         break;
       }
@@ -271,6 +274,7 @@ function projectGoal(
           sourceId: record.id,
           sourceName: record.nombre,
           person: personPorBolsa.get(ev.bagId),
+          registradoPor: personOf(users, ev.registradoPorUserId),
         });
         break;
       }
@@ -288,6 +292,7 @@ function projectGoal(
           module: "fintual",
           sourceId: record.id,
           sourceName: record.nombre,
+          registradoPor: personOf(users, ev.registradoPorUserId),
         });
         break;
       }
@@ -307,7 +312,11 @@ function projectGoal(
   };
 }
 
-function projectCaja(box: CashBoxRecord, events: CashBoxEvent[]): Caja {
+function projectCaja(
+  box: CashBoxRecord,
+  events: CashBoxEvent[],
+  users: User[]
+): Caja {
   let saldo = 0;
   const movimientos: Movement[] = [];
 
@@ -324,6 +333,7 @@ function projectCaja(box: CashBoxRecord, events: CashBoxEvent[]): Caja {
           detail: ev.nota,
           module: "caja",
           sourceName: box.nombre,
+          registradoPor: personOf(users, ev.registradoPorUserId),
         });
         break;
 
@@ -337,6 +347,7 @@ function projectCaja(box: CashBoxRecord, events: CashBoxEvent[]): Caja {
           label: ev.descripcion || "Gasto de casa",
           module: "caja",
           sourceName: box.nombre,
+          registradoPor: personOf(users, ev.registradoPorUserId),
         });
         break;
 
@@ -352,6 +363,7 @@ function projectCaja(box: CashBoxRecord, events: CashBoxEvent[]): Caja {
           detail: ev.nota || `Saldo ajustado a ${formatCLP(ev.nuevoSaldo)}`,
           module: "caja",
           sourceName: box.nombre,
+          registradoPor: personOf(users, ev.registradoPorUserId),
         });
         break;
       }
@@ -377,7 +389,11 @@ export function projectFinanceState(store: FinanceStore): FinanceState {
       )
     ),
     caja: box
-      ? projectCaja(box, store.cashBoxEvents.filter((e) => e.boxId === box.id))
+      ? projectCaja(
+          box,
+          store.cashBoxEvents.filter((e) => e.boxId === box.id),
+          store.users
+        )
       : { saldo: 0, movimientos: [] },
   };
 }

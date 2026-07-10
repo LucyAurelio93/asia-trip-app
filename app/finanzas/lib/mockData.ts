@@ -6,6 +6,10 @@ import type { FinanceStore } from "./types";
 //
 // Los eventos están en orden cronológico. Los montos "Saldo inicial" son la
 // carga inicial de cada bolsa (histórico previo resumido en un depósito).
+//
+// registradoPorUserId alterna entre Piero y Consu para poder verificar en la
+// UI que el autor del registro es independiente del titular del DAP o del
+// dueño de la bolsa (p. ej. Piero registra la renovación del DAP de Consu).
 
 export const initialFinanceStore: FinanceStore = {
   users: [
@@ -28,6 +32,7 @@ export const initialFinanceStore: FinanceStore = {
       montoTotal: 11_550_000,
       dias: 30,
       tasa: 0.55,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "dap1-e2",
@@ -38,6 +43,7 @@ export const initialFinanceStore: FinanceStore = {
       aporte: 0,
       dias: 30,
       tasa: 0.55,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "dap1-e3",
@@ -48,6 +54,7 @@ export const initialFinanceStore: FinanceStore = {
       aporte: 0,
       dias: 30,
       tasa: 0.55,
+      registradoPorUserId: "user-consu",
     },
     {
       id: "dap1-e4",
@@ -58,6 +65,7 @@ export const initialFinanceStore: FinanceStore = {
       aporte: 0,
       dias: 30,
       tasa: 0.55,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "dap1-e5",
@@ -68,6 +76,7 @@ export const initialFinanceStore: FinanceStore = {
       aporte: 250_000,
       dias: 30,
       tasa: 0.55,
+      registradoPorUserId: "user-piero",
     },
     // BancoEstado: apertura trimestral + una renovación.
     {
@@ -78,6 +87,7 @@ export const initialFinanceStore: FinanceStore = {
       montoTotal: 6_000_000,
       dias: 90,
       tasa: 1.6,
+      registradoPorUserId: "user-consu",
     },
     {
       id: "dap2-e2",
@@ -88,6 +98,7 @@ export const initialFinanceStore: FinanceStore = {
       aporte: 0,
       dias: 90,
       tasa: 1.6,
+      registradoPorUserId: "user-piero",
     },
   ],
 
@@ -115,6 +126,7 @@ export const initialFinanceStore: FinanceStore = {
       bagId: "bag-depa-piero",
       monto: 3_800_000,
       nota: "Saldo inicial",
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fd-e2",
@@ -124,6 +136,7 @@ export const initialFinanceStore: FinanceStore = {
       bagId: "bag-depa-consu",
       monto: 3_600_000,
       nota: "Saldo inicial",
+      registradoPorUserId: "user-consu",
     },
     {
       id: "fd-e3",
@@ -131,6 +144,7 @@ export const initialFinanceStore: FinanceStore = {
       fecha: "2026-05-31",
       tipo: "variacion",
       variacionTotal: 516_200,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fd-e4",
@@ -139,6 +153,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "deposito",
       bagId: "bag-depa-piero",
       monto: 200_000,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fd-e5",
@@ -146,6 +161,7 @@ export const initialFinanceStore: FinanceStore = {
       fecha: "2026-06-30",
       tipo: "variacion",
       variacionTotal: 612_400,
+      registradoPorUserId: "user-consu",
     },
     {
       id: "fd-e6",
@@ -154,6 +170,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "deposito",
       bagId: "bag-depa-consu",
       monto: 200_000,
+      registradoPorUserId: "user-consu",
     },
     {
       id: "fd-e7",
@@ -162,6 +179,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "deposito",
       bagId: "bag-depa-piero",
       monto: 200_000,
+      registradoPorUserId: "user-piero",
     },
 
     // Viaje Asia — bolsas: 900.000 c/u · variación −24.300
@@ -173,6 +191,7 @@ export const initialFinanceStore: FinanceStore = {
       bagId: "bag-viaje-piero",
       monto: 750_000,
       nota: "Saldo inicial",
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fv-e2",
@@ -182,6 +201,7 @@ export const initialFinanceStore: FinanceStore = {
       bagId: "bag-viaje-consu",
       monto: 750_000,
       nota: "Saldo inicial",
+      registradoPorUserId: "user-consu",
     },
     {
       id: "fv-e3",
@@ -189,6 +209,7 @@ export const initialFinanceStore: FinanceStore = {
       fecha: "2026-05-31",
       tipo: "variacion",
       variacionTotal: 7_200,
+      registradoPorUserId: "user-consu",
     },
     {
       id: "fv-e4",
@@ -197,14 +218,18 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "deposito",
       bagId: "bag-viaje-piero",
       monto: 150_000,
+      registradoPorUserId: "user-piero",
     },
     {
+      // Piero registra el depósito de la bolsa de Consu: el autor no tiene
+      // por qué coincidir con el dueño de la bolsa.
       id: "fv-e5",
       goalId: "fin-viaje",
       fecha: "2026-06-15",
       tipo: "deposito",
       bagId: "bag-viaje-consu",
       monto: 150_000,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fv-e6",
@@ -212,6 +237,7 @@ export const initialFinanceStore: FinanceStore = {
       fecha: "2026-06-30",
       tipo: "variacion",
       variacionTotal: -24_300,
+      registradoPorUserId: "user-piero",
     },
 
     // Jubilación Piero — bolsa única: 2.500.000 · variación +181.700
@@ -223,6 +249,7 @@ export const initialFinanceStore: FinanceStore = {
       bagId: "bag-jub-piero",
       monto: 2_400_000,
       nota: "Saldo inicial",
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fj-e2",
@@ -230,6 +257,7 @@ export const initialFinanceStore: FinanceStore = {
       fecha: "2026-05-31",
       tipo: "variacion",
       variacionTotal: 139_600,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fj-e3",
@@ -238,6 +266,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "deposito",
       bagId: "bag-jub-piero",
       monto: 100_000,
+      registradoPorUserId: "user-piero",
     },
     {
       id: "fj-e4",
@@ -245,6 +274,7 @@ export const initialFinanceStore: FinanceStore = {
       fecha: "2026-06-30",
       tipo: "variacion",
       variacionTotal: 181_700,
+      registradoPorUserId: "user-consu",
     },
   ],
 
@@ -259,6 +289,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "aporte",
       monto: 500_000,
       nota: "Aporte mensual",
+      registradoPorUserId: "user-piero",
     },
     {
       id: "cj-e2",
@@ -267,6 +298,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "gasto",
       monto: 135_000,
       descripcion: "Reparación lavadora",
+      registradoPorUserId: "user-consu",
     },
     {
       id: "cj-e3",
@@ -275,6 +307,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "aporte",
       monto: 500_000,
       nota: "Aporte mensual",
+      registradoPorUserId: "user-piero",
     },
     {
       id: "cj-e4",
@@ -283,6 +316,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "gasto",
       monto: 85_000,
       descripcion: "Gásfiter baño",
+      registradoPorUserId: "user-consu",
     },
     {
       id: "cj-e5",
@@ -291,6 +325,7 @@ export const initialFinanceStore: FinanceStore = {
       tipo: "gasto",
       monto: 42_500,
       descripcion: "Ferretería",
+      registradoPorUserId: "user-piero",
     },
   ],
 };

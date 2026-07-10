@@ -417,6 +417,9 @@ export function MovementRow({
           {showSource ? ` · ${mov.sourceName}` : ""}
           {mov.detail ? ` · ${mov.detail}` : ""}
         </p>
+        <p className="truncate text-[11px] text-[#4a505a]">
+          Registrado por {mov.registradoPor}
+        </p>
       </div>
       <span
         className={`shrink-0 text-sm font-bold tabular-nums ${

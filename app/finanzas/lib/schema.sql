@@ -10,8 +10,17 @@
 create table users (
   id uuid primary key default gen_random_uuid(),
   nombre text not null unique,
+  -- Vínculo con Supabase Auth. Null mientras el módulo corre con datos mock;
+  -- al activar Auth cada persona se asocia a su usuario autenticado y los
+  -- eventos nuevos derivan registrado_por_user_id de esta relación.
+  auth_user_id uuid unique references auth.users (id),
   created_at timestamptz not null default now()
 );
+
+-- Autoría de eventos: cada tabla *_events guarda registrado_por_user_id, la
+-- persona que ingresó el evento en la app. No confundir con el titular de un
+-- DAP ni con el dueño de una bolsa Fintual: esos indican de quién es el
+-- dinero; la autoría indica quién registró el movimiento.
 
 -- ── DAP ──────────────────────────────────────────────────────────────────────
 -- La entidad solo identifica el instrumento; plazo, tasa y montos viven en
@@ -34,22 +43,35 @@ create table dap_events (
   -- retiro:     monto, razon
   -- cierre:     nota
   monto_total bigint check (monto_total >= 0),
-  aporte bigint,
+  aporte bigint check (aporte >= 0),
   monto bigint check (monto > 0),
   dias integer check (dias > 0),
   tasa numeric(8, 4) check (tasa >= 0), -- % del período
   razon text,
   nota text,
+  registrado_por_user_id uuid not null references users (id),
   created_at timestamptz not null default now(),
+  -- Cada tipo exige sus campos y prohíbe los ajenos: un evento no puede
+  -- arrastrar columnas de otro tipo.
   check (
-    (tipo = 'apertura' and monto_total is not null and dias is not null and tasa is not null)
-    or (tipo = 'renovacion' and monto_total is not null and aporte is not null and dias is not null and tasa is not null)
-    or (tipo = 'retiro' and monto is not null)
-    or (tipo = 'cierre')
+    (tipo = 'apertura'
+      and monto_total is not null and dias is not null and tasa is not null
+      and aporte is null and monto is null and razon is null and nota is null)
+    or (tipo = 'renovacion'
+      and monto_total is not null and aporte is not null and dias is not null and tasa is not null
+      and monto is null and razon is null and nota is null)
+    or (tipo = 'retiro'
+      and monto is not null
+      and monto_total is null and aporte is null and dias is null and tasa is null and nota is null)
+    or (tipo = 'cierre'
+      and monto_total is null and aporte is null and monto is null
+      and dias is null and tasa is null and razon is null)
   )
 );
 
 create index dap_events_dap_fecha on dap_events (dap_id, fecha, created_at);
+-- Historial por autor ("qué registró X"), ordenable por fecha.
+create index dap_events_registrado_por on dap_events (registrado_por_user_id, fecha);
 
 -- ── Fintual ──────────────────────────────────────────────────────────────────
 -- Objetivo grupal: una bolsa por persona; personal: una sola bolsa.
@@ -68,7 +90,10 @@ create table fintual_goal_bags (
   goal_id uuid not null references fintual_goals (id),
   user_id uuid not null references users (id),
   created_at timestamptz not null default now(),
-  unique (goal_id, user_id)
+  unique (goal_id, user_id),
+  -- Clave redundante (id ya es única) que habilita la FK compuesta de
+  -- fintual_events: permite referenciar la bolsa JUNTO con su objetivo.
+  unique (id, goal_id)
 );
 
 create table fintual_events (
@@ -78,18 +103,31 @@ create table fintual_events (
   tipo text not null check (tipo in ('deposito', 'retiro', 'variacion')),
   -- deposito/retiro: bag_id, monto, nota
   -- variacion:       variacion_total (nunca lleva bag_id: es del objetivo)
-  bag_id uuid references fintual_goal_bags (id),
+  bag_id uuid,
   monto bigint check (monto > 0),
   variacion_total bigint,
   nota text,
+  registrado_por_user_id uuid not null references users (id),
   created_at timestamptz not null default now(),
+  -- Coherencia goal/bolsa: la bolsa referenciada debe pertenecer al mismo
+  -- objetivo del evento. La FK compuesta contra (id, goal_id) de
+  -- fintual_goal_bags lo garantiza en la base (no solo en la aplicación);
+  -- cuando bag_id es null (variación) la FK no aplica, como corresponde.
+  foreign key (bag_id, goal_id) references fintual_goal_bags (id, goal_id),
+  -- Cada tipo exige sus campos y prohíbe los ajenos.
   check (
-    (tipo in ('deposito', 'retiro') and bag_id is not null and monto is not null and variacion_total is null)
-    or (tipo = 'variacion' and variacion_total is not null and bag_id is null and monto is null)
+    (tipo in ('deposito', 'retiro')
+      and bag_id is not null and monto is not null
+      and variacion_total is null)
+    or (tipo = 'variacion'
+      and variacion_total is not null
+      and bag_id is null and monto is null and nota is null)
   )
 );
 
 create index fintual_events_goal_fecha on fintual_events (goal_id, fecha, created_at);
+-- Historial por autor ("qué registró X"), ordenable por fecha.
+create index fintual_events_registrado_por on fintual_events (registrado_por_user_id, fecha);
 
 -- ── Caja ─────────────────────────────────────────────────────────────────────
 -- Caja acumulativa. El ajuste declara el saldo correcto a una fecha;
@@ -113,12 +151,22 @@ create table cash_box_events (
   nuevo_saldo bigint,
   descripcion text,
   nota text,
+  registrado_por_user_id uuid not null references users (id),
   created_at timestamptz not null default now(),
+  -- Cada tipo exige sus campos y prohíbe los ajenos.
   check (
-    (tipo = 'aporte' and monto is not null and nuevo_saldo is null)
-    or (tipo = 'gasto' and monto is not null and descripcion is not null and nuevo_saldo is null)
-    or (tipo = 'ajuste' and nuevo_saldo is not null and monto is null)
+    (tipo = 'aporte'
+      and monto is not null
+      and nuevo_saldo is null and descripcion is null)
+    or (tipo = 'gasto'
+      and monto is not null and descripcion is not null
+      and nuevo_saldo is null and nota is null)
+    or (tipo = 'ajuste'
+      and nuevo_saldo is not null
+      and monto is null and descripcion is null)
   )
 );
 
 create index cash_box_events_box_fecha on cash_box_events (box_id, fecha, created_at);
+-- Historial por autor ("qué registró X"), ordenable por fecha.
+create index cash_box_events_registrado_por on cash_box_events (registrado_por_user_id, fecha);

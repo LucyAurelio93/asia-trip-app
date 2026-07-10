@@ -10,7 +10,14 @@ import type {
   FinanceStore,
   FintualEvent,
   Person,
+  UserId,
 } from "./types";
+
+// TEMPORAL: autor por defecto de todo evento nuevo mientras no hay login.
+// Al conectar Supabase Auth, este valor se reemplaza por el user derivado del
+// usuario autenticado (users.auth_user_id → users.id); es el único punto del
+// módulo que decide quién registra.
+const TEMP_ACTIVE_USER_ID: UserId = "user-piero";
 
 export type FinanceAction =
   | {
@@ -99,6 +106,7 @@ export function financeReducer(
         aporte: action.aporte,
         dias: action.dias,
         tasa: action.tasa,
+        registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return { ...store, dapEvents: [...store.dapEvents, event] };
     }
@@ -111,6 +119,7 @@ export function financeReducer(
         tipo: "retiro",
         monto: action.monto,
         razon: action.razon || undefined,
+        registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return { ...store, dapEvents: [...store.dapEvents, event] };
     }
@@ -130,6 +139,7 @@ export function financeReducer(
         bagId,
         monto: action.monto,
         nota: "nota" in action ? action.nota || undefined : undefined,
+        registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return {
         ...store,
@@ -146,6 +156,7 @@ export function financeReducer(
         fecha: action.fecha,
         tipo: "variacion",
         variacionTotal: action.nuevaVariacion,
+        registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return { ...store, fintualEvents: [...store.fintualEvents, event] };
     }
@@ -159,6 +170,7 @@ export function financeReducer(
         tipo: "aporte",
         monto: action.monto,
         nota: action.nota || undefined,
+        registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return { ...store, cashBoxes, cashBoxEvents: [...store.cashBoxEvents, event] };
     }
@@ -172,6 +184,7 @@ export function financeReducer(
         tipo: "gasto",
         monto: action.monto,
         descripcion: action.descripcion,
+        registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return { ...store, cashBoxes, cashBoxEvents: [...store.cashBoxEvents, event] };
     }
@@ -185,6 +198,7 @@ export function financeReducer(
         tipo: "ajuste",
         nuevoSaldo: action.nuevoSaldo,
         nota: action.nota || undefined,
+        registradoPorUserId: TEMP_ACTIVE_USER_ID,
       };
       return { ...store, cashBoxes, cashBoxEvents: [...store.cashBoxEvents, event] };
     }

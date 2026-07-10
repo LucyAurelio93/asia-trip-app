@@ -24,7 +24,17 @@ export type Person = "Piero" | "Consu";
 export type User = {
   id: UserId;
   nombre: Person;
+  // Vínculo con Supabase Auth (users.auth_user_id). Null mientras el módulo
+  // corre con datos mock; al activar Auth cada persona queda asociada a su
+  // usuario autenticado.
+  authUserId?: string | null;
 };
+
+// Autoría de eventos: todo evento (DAP, Fintual, Caja) guarda quién lo
+// registró en la app. No confundir con el titular de un DAP, el dueño de una
+// bolsa Fintual ni la persona de un objetivo: esos describen a quién pertenece
+// el dinero; registradoPorUserId describe quién ingresó el dato. Hoy lo fija
+// commands.ts; al conectar Supabase Auth vendrá del usuario autenticado.
 
 // ── DAP ──────────────────────────────────────────────────────────────────────
 // La entidad solo identifica el instrumento. Tasa, plazo, capital y valor
@@ -45,6 +55,7 @@ export type DapEvent =
       montoTotal: number; // CLP, valor total inicial del DAP
       dias: number;
       tasa: number; // % del período
+      registradoPorUserId: UserId; // autor del registro (no el titular)
     }
   | {
       id: string;
@@ -55,6 +66,7 @@ export type DapEvent =
       aporte: number; // aporte nuevo (0 si solo renueva)
       dias: number;
       tasa: number;
+      registradoPorUserId: UserId;
     }
   | {
       id: string;
@@ -63,6 +75,7 @@ export type DapEvent =
       tipo: "retiro";
       monto: number; // CLP, positivo
       razon?: string;
+      registradoPorUserId: UserId;
     }
   | {
       id: string;
@@ -70,6 +83,7 @@ export type DapEvent =
       fecha: string;
       tipo: "cierre"; // retiro total: deja el DAP en cero
       nota?: string;
+      registradoPorUserId: UserId;
     };
 
 // ── Fintual ──────────────────────────────────────────────────────────────────
@@ -99,6 +113,7 @@ export type FintualEvent =
       bagId: string;
       monto: number; // CLP, positivo
       nota?: string;
+      registradoPorUserId: UserId; // autor del registro (no el dueño de la bolsa)
     }
   | {
       id: string;
@@ -108,6 +123,7 @@ export type FintualEvent =
       bagId: string;
       monto: number; // CLP, positivo
       nota?: string;
+      registradoPorUserId: UserId;
     }
   | {
       id: string;
@@ -115,6 +131,7 @@ export type FintualEvent =
       fecha: string;
       tipo: "variacion";
       variacionTotal: number; // variación acumulada declarada a esa fecha
+      registradoPorUserId: UserId;
     };
 
 // ── Caja ─────────────────────────────────────────────────────────────────────
@@ -134,6 +151,7 @@ export type CashBoxEvent =
       tipo: "aporte";
       monto: number; // CLP, positivo
       nota?: string;
+      registradoPorUserId: UserId; // autor del registro
     }
   | {
       id: string;
@@ -142,6 +160,7 @@ export type CashBoxEvent =
       tipo: "gasto";
       monto: number; // CLP, positivo
       descripcion: string;
+      registradoPorUserId: UserId;
     }
   | {
       id: string;
@@ -150,6 +169,7 @@ export type CashBoxEvent =
       tipo: "ajuste";
       nuevoSaldo: number; // saldo declarado tras el ajuste
       nota?: string;
+      registradoPorUserId: UserId;
     };
 
 // ── Store ────────────────────────────────────────────────────────────────────
