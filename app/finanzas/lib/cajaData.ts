@@ -18,7 +18,6 @@ import { supabase } from "@/lib/supabase";
 import type {
   CashBoxEvent,
   CashBoxRecord,
-  Person,
   User,
   UserId,
 } from "./types";
@@ -53,7 +52,17 @@ type CashBoxEventRow = {
 
 function toUser(row: UserRow): User {
   // users.nombre es text en la base; el dominio solo conoce a Piero y Consu.
-  return { id: row.id, nombre: row.nombre as Person };
+  // toUser es la frontera SQL → dominio: se valida aquí, sin cast, y todo
+  // consumidor de User.nombre (Caja y Fintual) puede confiar en el tipo.
+  if (row.nombre !== "Piero" && row.nombre !== "Consu") {
+    throw new Error(
+      `Usuario inválido en public.users (id ${row.id}): nombre desconocido ${JSON.stringify(row.nombre)}.`
+    );
+  }
+  return {
+    id: row.id,
+    nombre: row.nombre,
+  };
 }
 
 function toCashBoxRecord(row: CashBoxRow): CashBoxRecord {

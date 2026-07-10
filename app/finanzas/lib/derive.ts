@@ -214,7 +214,9 @@ function projectDap(record: DapRecord, events: DapEvent[], users: User[]): Dap {
   };
 }
 
-function projectGoal(
+// Exportada: Fintual ya se proyecta desde filas reales de Supabase
+// (useFintual.ts), no solo desde el store mock de projectFinanceState.
+export function projectGoal(
   record: FintualGoalRecord,
   bags: FintualGoalBag[],
   events: FintualEvent[],

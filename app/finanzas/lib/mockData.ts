@@ -4,12 +4,11 @@ import type { FinanceStore } from "./types";
 // nunca saldos. Cada arreglo es espejo de una tabla de schema.sql; al conectar
 // Supabase este archivo se reemplaza por selects equivalentes.
 //
-// Los eventos están en orden cronológico. Los montos "Saldo inicial" son la
-// carga inicial de cada bolsa (histórico previo resumido en un depósito).
+// Los eventos están en orden cronológico.
 //
 // registradoPorUserId alterna entre Piero y Consu para poder verificar en la
-// UI que el autor del registro es independiente del titular del DAP o del
-// dueño de la bolsa (p. ej. Piero registra la renovación del DAP de Consu).
+// UI que el autor del registro es independiente del titular del DAP
+// (p. ej. Piero registra la renovación del DAP de Consu).
 
 export const initialFinanceStore: FinanceStore = {
   users: [
@@ -102,185 +101,16 @@ export const initialFinanceStore: FinanceStore = {
     },
   ],
 
-  fintualGoals: [
-    { id: "fin-depa", nombre: "Depa", tipo: "grupal" },
-    { id: "fin-viaje", nombre: "Viaje Asia", tipo: "grupal" },
-    { id: "fin-jubilacion", nombre: "Jubilación Piero", tipo: "personal" },
-  ],
+  // Caja y Fintual ya persisten en Supabase (cajaData.ts/useCaja.ts y
+  // fintualData.ts/useFintual.ts): sus mocks se retiraron para no mezclar
+  // entidades ni eventos mock con los reales en Resumen ni en Historial.
+  // Solo DAP sigue sobre los mocks de arriba.
+  fintualGoals: [],
 
-  fintualGoalBags: [
-    { id: "bag-depa-piero", goalId: "fin-depa", userId: "user-piero" },
-    { id: "bag-depa-consu", goalId: "fin-depa", userId: "user-consu" },
-    { id: "bag-viaje-piero", goalId: "fin-viaje", userId: "user-piero" },
-    { id: "bag-viaje-consu", goalId: "fin-viaje", userId: "user-consu" },
-    { id: "bag-jub-piero", goalId: "fin-jubilacion", userId: "user-piero" },
-  ],
+  fintualGoalBags: [],
 
-  fintualEvents: [
-    // Depa — bolsas: Piero 4.200.000 · Consu 3.800.000 · variación +612.400
-    {
-      id: "fd-e1",
-      goalId: "fin-depa",
-      fecha: "2026-05-01",
-      tipo: "deposito",
-      bagId: "bag-depa-piero",
-      monto: 3_800_000,
-      nota: "Saldo inicial",
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fd-e2",
-      goalId: "fin-depa",
-      fecha: "2026-05-01",
-      tipo: "deposito",
-      bagId: "bag-depa-consu",
-      monto: 3_600_000,
-      nota: "Saldo inicial",
-      registradoPorUserId: "user-consu",
-    },
-    {
-      id: "fd-e3",
-      goalId: "fin-depa",
-      fecha: "2026-05-31",
-      tipo: "variacion",
-      variacionTotal: 516_200,
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fd-e4",
-      goalId: "fin-depa",
-      fecha: "2026-06-02",
-      tipo: "deposito",
-      bagId: "bag-depa-piero",
-      monto: 200_000,
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fd-e5",
-      goalId: "fin-depa",
-      fecha: "2026-06-30",
-      tipo: "variacion",
-      variacionTotal: 612_400,
-      registradoPorUserId: "user-consu",
-    },
-    {
-      id: "fd-e6",
-      goalId: "fin-depa",
-      fecha: "2026-07-01",
-      tipo: "deposito",
-      bagId: "bag-depa-consu",
-      monto: 200_000,
-      registradoPorUserId: "user-consu",
-    },
-    {
-      id: "fd-e7",
-      goalId: "fin-depa",
-      fecha: "2026-07-01",
-      tipo: "deposito",
-      bagId: "bag-depa-piero",
-      monto: 200_000,
-      registradoPorUserId: "user-piero",
-    },
+  fintualEvents: [],
 
-    // Viaje Asia — bolsas: 900.000 c/u · variación −24.300
-    {
-      id: "fv-e1",
-      goalId: "fin-viaje",
-      fecha: "2026-05-01",
-      tipo: "deposito",
-      bagId: "bag-viaje-piero",
-      monto: 750_000,
-      nota: "Saldo inicial",
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fv-e2",
-      goalId: "fin-viaje",
-      fecha: "2026-05-01",
-      tipo: "deposito",
-      bagId: "bag-viaje-consu",
-      monto: 750_000,
-      nota: "Saldo inicial",
-      registradoPorUserId: "user-consu",
-    },
-    {
-      id: "fv-e3",
-      goalId: "fin-viaje",
-      fecha: "2026-05-31",
-      tipo: "variacion",
-      variacionTotal: 7_200,
-      registradoPorUserId: "user-consu",
-    },
-    {
-      id: "fv-e4",
-      goalId: "fin-viaje",
-      fecha: "2026-06-15",
-      tipo: "deposito",
-      bagId: "bag-viaje-piero",
-      monto: 150_000,
-      registradoPorUserId: "user-piero",
-    },
-    {
-      // Piero registra el depósito de la bolsa de Consu: el autor no tiene
-      // por qué coincidir con el dueño de la bolsa.
-      id: "fv-e5",
-      goalId: "fin-viaje",
-      fecha: "2026-06-15",
-      tipo: "deposito",
-      bagId: "bag-viaje-consu",
-      monto: 150_000,
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fv-e6",
-      goalId: "fin-viaje",
-      fecha: "2026-06-30",
-      tipo: "variacion",
-      variacionTotal: -24_300,
-      registradoPorUserId: "user-piero",
-    },
-
-    // Jubilación Piero — bolsa única: 2.500.000 · variación +181.700
-    {
-      id: "fj-e1",
-      goalId: "fin-jubilacion",
-      fecha: "2026-05-01",
-      tipo: "deposito",
-      bagId: "bag-jub-piero",
-      monto: 2_400_000,
-      nota: "Saldo inicial",
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fj-e2",
-      goalId: "fin-jubilacion",
-      fecha: "2026-05-31",
-      tipo: "variacion",
-      variacionTotal: 139_600,
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fj-e3",
-      goalId: "fin-jubilacion",
-      fecha: "2026-06-05",
-      tipo: "deposito",
-      bagId: "bag-jub-piero",
-      monto: 100_000,
-      registradoPorUserId: "user-piero",
-    },
-    {
-      id: "fj-e4",
-      goalId: "fin-jubilacion",
-      fecha: "2026-06-30",
-      tipo: "variacion",
-      variacionTotal: 181_700,
-      registradoPorUserId: "user-consu",
-    },
-  ],
-
-  // Caja ya persiste en Supabase (cajaData.ts/useCaja.ts): sus mocks se
-  // retiraron para no mezclar eventos mock con eventos reales en Resumen ni
-  // en Historial. DAP y Fintual siguen sobre los mocks de arriba.
   cashBoxes: [],
 
   cashBoxEvents: [],

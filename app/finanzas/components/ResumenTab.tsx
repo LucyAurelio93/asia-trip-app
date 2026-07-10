@@ -11,6 +11,7 @@ import {
   totalFintual,
   type CajaStatus,
   type FinanceState,
+  type FintualStatus,
 } from "../lib/model";
 import type { TabId } from "./FinanzasApp";
 import {
@@ -24,15 +25,40 @@ import {
 
 type Props = {
   state: FinanceState;
-  // Estado de la carga de Caja (Supabase). Mientras no sea "listo",
-  // state.caja es la proyección vacía y NO puede sumarse como si fuera $0.
+  // Estados de carga de Caja y Fintual (Supabase). Mientras alguno no sea
+  // "listo", su parte de state es la proyección vacía y NO puede sumarse al
+  // patrimonio como si fuera $0.
   cajaStatus: CajaStatus;
+  fintualStatus: FintualStatus;
   onReloadCaja: () => void;
+  onReloadFintual: () => void;
   onGoTo: (tab: TabId) => void;
 };
 
-export default function ResumenTab({ state, cajaStatus, onReloadCaja, onGoTo }: Props) {
+export default function ResumenTab({
+  state,
+  cajaStatus,
+  fintualStatus,
+  onReloadCaja,
+  onReloadFintual,
+  onGoTo,
+}: Props) {
   const cajaLista = cajaStatus === "listo";
+  const fintualListo = fintualStatus === "listo";
+  const todoListo = cajaLista && fintualListo;
+  const modulosConError = [
+    cajaStatus === "error" ? "Caja" : null,
+    fintualStatus === "error" ? "Fintual" : null,
+  ].filter((m): m is string => m !== null);
+  const modulosPendientes = [
+    !cajaLista ? "Caja" : null,
+    !fintualListo ? "Fintual" : null,
+  ].filter((m): m is string => m !== null);
+  const reintentar = () => {
+    if (cajaStatus === "error") onReloadCaja();
+    if (fintualStatus === "error") onReloadFintual();
+  };
+
   const total = patrimonio(state);
   const proximo = proximoVencimiento(state.daps);
   const recientes = allMovements(state).slice(0, 5);
@@ -48,8 +74,13 @@ export default function ResumenTab({ state, cajaStatus, onReloadCaja, onGoTo }: 
     {
       tab: "fintual" as const,
       label: "Fintual",
-      sub: `${state.fintual.length} objetivos`,
-      value: totalFintual(state.fintual) as number | null,
+      sub: fintualListo
+        ? `${state.fintual.length} objetivos`
+        : fintualStatus === "cargando"
+          ? "Cargando desde Supabase…"
+          : "No se pudo cargar",
+      // null = balance aún no disponible: se muestra un placeholder, nunca $0.
+      value: fintualListo ? totalFintual(state.fintual) : null,
       icon: <TrendingUp size={16} />,
     },
     {
@@ -75,23 +106,26 @@ export default function ResumenTab({ state, cajaStatus, onReloadCaja, onGoTo }: 
 
       <HeroCard className="p-6">
         <SectionLabel>Patrimonio familiar</SectionLabel>
-        {cajaLista ? (
+        {todoListo ? (
           <p className="mt-2 text-[2.75rem] font-bold leading-none tracking-tight text-[#e9ebee]">
             {formatCLP(total)}
           </p>
-        ) : cajaStatus === "cargando" ? (
-          <p className="mt-3 text-sm text-[#8b929c]">Cargando datos de Caja…</p>
-        ) : (
+        ) : modulosConError.length > 0 ? (
           <div className="mt-3 space-y-4">
             <p className="text-sm text-[#f87171]">
               El patrimonio total no puede calcularse completamente: los datos
-              de Caja no se pudieron cargar.
+              de {modulosConError.join(" y ")} no se pudieron cargar.
             </p>
-            <GhostButton onClick={onReloadCaja}>Reintentar</GhostButton>
+            <GhostButton onClick={reintentar}>Reintentar</GhostButton>
           </div>
+        ) : (
+          <p className="mt-3 text-sm text-[#8b929c]">
+            El patrimonio total aún no está completo: cargando datos de{" "}
+            {modulosPendientes.join(" y ")}…
+          </p>
         )}
         <p className="mt-3 text-xs text-[#6b727c]">
-          DAP y Fintual: datos de prueba · Caja casa: datos reales
+          DAP: datos de prueba · Fintual y Caja casa: datos reales
         </p>
       </HeroCard>
 
@@ -148,11 +182,11 @@ export default function ResumenTab({ state, cajaStatus, onReloadCaja, onGoTo }: 
           Últimos movimientos
         </SectionHeading>
         <Card className="px-5 py-2">
-          {!cajaLista ? (
+          {!todoListo ? (
             <p className="border-b border-[#1a1e25] py-3 text-xs text-[#8b929c]">
-              {cajaStatus === "cargando"
-                ? "Los movimientos de Caja aún se están cargando y no aparecen aquí."
-                : "Los movimientos de Caja no se pudieron cargar: esta lista está incompleta."}
+              {modulosConError.length > 0
+                ? `Los movimientos de ${modulosConError.join(" y ")} no se pudieron cargar: esta lista está incompleta.`
+                : `Los movimientos de ${modulosPendientes.join(" y ")} aún se están cargando y no aparecen aquí.`}
             </p>
           ) : null}
           <MovementList movements={recientes} showSource />

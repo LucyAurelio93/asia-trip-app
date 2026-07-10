@@ -1,5 +1,14 @@
 "use client";
 
+// Fintual conectado a Supabase: lee objetivos/bolsas/eventos vía useFintual,
+// inserta con autor real y recarga tras cada escritura. Los formularios
+// muestran el error de la base si el insert fue rechazado (quedan abiertos)
+// y los balances mostrados nunca se adelantan a lo persistido.
+//
+// Los objetivos y sus bolsas se crean manualmente en Supabase (la creación
+// atómica desde la app llegará con una RPC en una migración futura): esta
+// tab solo registra depósitos, retiros y variaciones sobre bolsas existentes.
+
 import { useState } from "react";
 import { ChevronRight, History } from "lucide-react";
 import {
@@ -12,9 +21,10 @@ import {
   goalVariacionPct,
   todayISO,
   totalFintual,
-  type FinanceAction,
   type FintualGoal,
+  type FintualWriteResult,
   type Person,
+  type UseFintualResult,
 } from "../lib/model";
 import { useBackView } from "./backNav";
 import {
@@ -33,29 +43,157 @@ import {
   SectionLabel,
   Sheet,
   TextInput,
+  useMockNotice,
 } from "./ui";
 
-const YO: Person = "Piero"; // "Mi parte" del mock
-
 type Props = {
-  goals: FintualGoal[];
-  dispatch: (action: FinanceAction) => void;
+  conn: UseFintualResult;
 };
 
-export default function FintualTab({ goals, dispatch }: Props) {
+function FintualHeader() {
+  return (
+    <header className="flex items-center justify-between gap-4">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-[#e9ebee]">Fintual</h1>
+        <p className="mt-0.5 text-sm text-[#8b929c]">Objetivos de inversión</p>
+      </div>
+    </header>
+  );
+}
+
+// Confirmación efímera tras una escritura aceptada por la base.
+function NoticeBanner({ text }: { text: string }) {
+  return (
+    <p className="rounded-xl border border-[#1d3a30] bg-[#12211c] px-4 py-3 text-center text-xs font-semibold text-[#34d399]">
+      {text}
+    </p>
+  );
+}
+
+// Aviso persistente para "se guardó, pero no se pudo refrescar la vista":
+// NO es efímero porque el usuario debe leerlo antes de recargar.
+function WarningBanner({ text }: { text: string }) {
+  return (
+    <p className="rounded-xl border border-[#3a2429] bg-[#1a1216] px-4 py-3 text-xs text-[#f87171]">
+      {text}
+    </p>
+  );
+}
+
+function SheetError({ text }: { text: string | null }) {
+  if (!text) return null;
+  return (
+    <p className="rounded-xl border border-[#3a2429] bg-[#1a1216] px-4 py-3 text-sm text-[#f87171]">
+      {text}
+    </p>
+  );
+}
+
+// Estado común de envío de los sheets: bloquea el botón mientras guarda y
+// muestra el error si Supabase rechazó la escritura (el sheet queda abierto).
+function useSheetSubmit<T>(onSubmit: (input: T) => Promise<string | null>) {
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handle = async (input: T) => {
+    setEnviando(true);
+    setError(null);
+    const err = await onSubmit(input);
+    if (err) {
+      setError(err);
+      setEnviando(false);
+    }
+    // En éxito el padre cierra el sheet: no hace falta re-habilitar.
+  };
+
+  return { enviando, error, handle };
+}
+
+// Traduce el resultado de un comando de useFintual al contrato de los sheets:
+// null cierra el sheet (guardado; si además falló el refresco, el aviso se
+// muestra fuera); string deja el sheet abierto mostrando el error.
+function useWriteFeedback() {
+  const [notice, setNotice] = useMockNotice();
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  const wrap =
+    <T,>(
+      comando: (input: T) => Promise<FintualWriteResult>,
+      confirmacion: string,
+      onDone: () => void
+    ) =>
+    async (input: T): Promise<string | null> => {
+      const result = await comando(input);
+      if (result && !result.guardado) return result.mensaje;
+      onDone();
+      if (result) {
+        // Guardado, pero el refresco falló: aviso persistente, no confirmación.
+        setAviso(result.mensaje);
+      } else {
+        setAviso(null);
+        setNotice(confirmacion);
+      }
+      return null;
+    };
+
+  return { notice, aviso, wrap };
+}
+
+export default function FintualTab({ conn }: Props) {
+  const { status, errorCarga, goals, currentPerson, reload } = conn;
   const [vista, setVista] = useState<"grupo" | "mi">("grupo");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
   const selected = goals.find((g) => g.id === selectedId) ?? null;
   // El detalle abierto participa del Atrás global (ver backNav.tsx).
   useBackView(selected !== null, () => setSelectedId(null));
 
-  if (selected) {
+  if (status === "cargando") {
     return (
-      <GoalDetail
-        goal={selected}
-        dispatch={dispatch}
-        onBack={() => setSelectedId(null)}
-      />
+      <div className="space-y-6">
+        <FintualHeader />
+        <Card className="p-6">
+          <p className="text-center text-sm text-[#8b929c]">Cargando objetivos…</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // Sin persona autenticada resuelta no hay "Mi parte" válida: useFintual
+  // deja la carga en error si la sesión no está vinculada, así que el caso
+  // currentPerson === null con status "listo" es solo defensa extra.
+  if (status === "error" || currentPerson === null) {
+    return (
+      <div className="space-y-6">
+        <FintualHeader />
+        <Card className="space-y-4 p-6">
+          <p className="text-sm text-[#f87171]">
+            {errorCarga ??
+              "No se pudo identificar tu usuario de la familia. Recarga e intenta de nuevo."}
+          </p>
+          <PrimaryButton onClick={reload}>Reintentar</PrimaryButton>
+        </Card>
+      </div>
+    );
+  }
+
+  if (selected) {
+    return <GoalDetail goal={selected} conn={conn} onBack={() => setSelectedId(null)} />;
+  }
+
+  // Estado vacío: aún no existe ningún objetivo en la base. Los objetivos se
+  // configuran directamente en Supabase, no desde la app.
+  if (goals.length === 0) {
+    return (
+      <div className="space-y-6">
+        <FintualHeader />
+        <Card className="p-6 text-center">
+          <p className="text-sm text-[#8b929c]">
+            Todavía no hay objetivos configurados. Cuando existan en la base,
+            aparecerán aquí automáticamente.
+          </p>
+        </Card>
+      </div>
     );
   }
 
@@ -64,17 +202,13 @@ export default function FintualTab({ goals, dispatch }: Props) {
   const balanceTotal = totalFintual(goals);
   const pctTotal = depositadoTotal > 0 ? (variacionTotal / depositadoTotal) * 100 : 0;
 
-  // "Mi parte" solo suma depósitos propios; la variación nunca se individualiza.
-  const miDepositado = goals.reduce((s, g) => s + bolsaDe(g, YO), 0);
+  // "Mi parte" = la persona autenticada: solo suma sus depósitos; la
+  // variación nunca se individualiza.
+  const miDepositado = goals.reduce((s, g) => s + bolsaDe(g, currentPerson), 0);
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#e9ebee]">Fintual</h1>
-          <p className="mt-0.5 text-sm text-[#8b929c]">Objetivos de inversión</p>
-        </div>
-      </header>
+      <FintualHeader />
 
       <PillToggle
         options={[
@@ -110,7 +244,7 @@ export default function FintualTab({ goals, dispatch }: Props) {
         </HeroCard>
       ) : (
         <HeroCard className="p-6">
-          <SectionLabel>Depositado por {YO}</SectionLabel>
+          <SectionLabel>Depositado por {currentPerson}</SectionLabel>
           <p className="mt-2 text-4xl font-bold tracking-tight text-[#e9ebee]">
             {formatCLP(miDepositado)}
           </p>
@@ -153,10 +287,10 @@ export default function FintualTab({ goals, dispatch }: Props) {
                 {vista === "mi" ? (
                   <div className="mt-3 flex items-baseline justify-between">
                     <p className="text-lg font-bold tabular-nums text-[#e9ebee]">
-                      {formatCLP(bolsaDe(goal, YO))}
+                      {formatCLP(bolsaDe(goal, currentPerson))}
                     </p>
                     <span className="text-xs font-semibold text-[#6b727c]">
-                      Mi depositado
+                      Depositado por {currentPerson}
                     </span>
                   </div>
                 ) : (
@@ -186,21 +320,29 @@ type GoalSheet = "deposito" | "retiro" | "variacion";
 
 function GoalDetail({
   goal,
-  dispatch,
+  conn,
   onBack,
 }: {
   goal: FintualGoal;
-  dispatch: (action: FinanceAction) => void;
+  conn: UseFintualResult;
   onBack: () => void;
 }) {
+  const { guardando, registrarDeposito, registrarRetiro, registrarVariacion } = conn;
   const [showHistory, setShowHistory] = useState(false);
   const [sheet, setSheet] = useState<GoalSheet | null>(null);
+  const { notice, aviso, wrap } = useWriteFeedback();
   // El historial del objetivo es un nivel más profundo que el detalle; los
   // sheets se registran solos (ver Sheet en ui.tsx) como el nivel más profundo.
   useBackView(showHistory, () => setShowHistory(false));
 
   const depositado = goalDepositado(goal);
   const balance = goalBalance(goal);
+  const cerrarSheet = () => setSheet(null);
+
+  // Objetivo sin bolsas: estructura incompleta en la base (las bolsas se
+  // crean manualmente junto con el objetivo). No hay dónde depositar ni de
+  // dónde retirar, y la UI no debe "elegir" un titular que la base no define.
+  const sinBolsas = goal.bolsas.length === 0;
 
   if (showHistory) {
     return (
@@ -258,7 +400,7 @@ function GoalDetail({
         </div>
       </HeroCard>
 
-      {goal.tipo === "grupal" ? (
+      {goal.tipo === "grupal" && !sinBolsas ? (
         <Card className="p-5">
           <SectionHeading>Bolsas por persona</SectionHeading>
           <div className="space-y-2.5 text-sm">
@@ -278,37 +420,61 @@ function GoalDetail({
         </Card>
       ) : null}
 
+      {sinBolsas ? (
+        <WarningBanner text="Este objetivo no tiene bolsas configuradas en la base: no se pueden registrar depósitos ni retiros hasta que se creen sus bolsas en Supabase." />
+      ) : null}
+
+      {notice ? <NoticeBanner text={notice} /> : null}
+      {aviso ? <WarningBanner text={aviso} /> : null}
+
       <div className="space-y-3">
-        <PrimaryButton onClick={() => setSheet("deposito")}>
+        <PrimaryButton
+          disabled={guardando || sinBolsas}
+          onClick={() => setSheet("deposito")}
+        >
           Sumar depósito
         </PrimaryButton>
         <div className="grid grid-cols-2 gap-3">
-          <GhostButton onClick={() => setSheet("retiro")}>Registrar retiro</GhostButton>
-          <GhostButton onClick={() => setSheet("variacion")}>
+          <GhostButton
+            disabled={guardando || sinBolsas}
+            onClick={() => setSheet("retiro")}
+          >
+            Registrar retiro
+          </GhostButton>
+          <GhostButton disabled={guardando} onClick={() => setSheet("variacion")}>
             Actualizar variación
           </GhostButton>
         </div>
       </div>
 
-      {/* Montados solo al abrir, para que los valores por defecto se recalculen */}
-      {sheet === "deposito" ? (
+      {/* Montados solo al abrir, para que los valores por defecto se recalculen.
+          Depósito/retiro exigen bolsas existentes (botones deshabilitados si
+          sinBolsas), así que goal.bolsas nunca está vacío dentro del sheet. */}
+      {sheet === "deposito" && !sinBolsas ? (
         <MovimientoSheet
           mode="deposito"
           goal={goal}
-          onClose={() => setSheet(null)}
-          dispatch={dispatch}
+          guardando={guardando}
+          onClose={cerrarSheet}
+          onSubmit={wrap(registrarDeposito, "Depósito registrado", cerrarSheet)}
         />
       ) : null}
-      {sheet === "retiro" ? (
+      {sheet === "retiro" && !sinBolsas ? (
         <MovimientoSheet
           mode="retiro"
           goal={goal}
-          onClose={() => setSheet(null)}
-          dispatch={dispatch}
+          guardando={guardando}
+          onClose={cerrarSheet}
+          onSubmit={wrap(registrarRetiro, "Retiro registrado", cerrarSheet)}
         />
       ) : null}
       {sheet === "variacion" ? (
-        <VariacionSheet goal={goal} onClose={() => setSheet(null)} dispatch={dispatch} />
+        <VariacionSheet
+          goal={goal}
+          guardando={guardando}
+          onClose={cerrarSheet}
+          onSubmit={wrap(registrarVariacion, "Variación guardada", cerrarSheet)}
+        />
       ) : null}
     </div>
   );
@@ -316,44 +482,43 @@ function GoalDetail({
 
 // ── Depósito / retiro (por bolsa si es grupal) ───────────────────────────────
 
+type MovimientoInput = {
+  goalId: string;
+  person: Person;
+  fecha: string;
+  monto: number;
+  nota?: string;
+};
+
 function MovimientoSheet({
   mode,
   goal,
+  guardando,
   onClose,
-  dispatch,
+  onSubmit,
 }: {
   mode: "deposito" | "retiro";
   goal: FintualGoal;
+  guardando: boolean;
   onClose: () => void;
-  dispatch: (action: FinanceAction) => void;
+  onSubmit: (input: MovimientoInput) => Promise<string | null>;
 }) {
+  // Solo personas con bolsa EXISTENTE en el objetivo: un personal ofrece
+  // únicamente a su titular real y un grupal a quienes tengan bolsa creada.
+  // La UI nunca inventa titulares ni bolsas.
+  const persons = goal.bolsas.map((b) => b.person);
+
   const [fecha, setFecha] = useState(todayISO());
   const [monto, setMonto] = useState<number | null>(null);
-  const [person, setPerson] = useState<Person>(goal.bolsas[0].person);
+  const [person, setPerson] = useState<Person>(persons[0]);
   const [nota, setNota] = useState("");
+  const { enviando, error, handle } = useSheetSubmit(onSubmit);
 
   const disponible = bolsaDe(goal, person);
   const valid =
     fecha !== "" &&
     (monto ?? 0) > 0 &&
     (mode === "deposito" || (monto ?? 0) <= disponible);
-
-  function submit() {
-    if (!valid) return;
-    if (mode === "deposito") {
-      dispatch({ type: "fintual/deposito", goalId: goal.id, person, fecha, monto: monto! });
-    } else {
-      dispatch({
-        type: "fintual/retiro",
-        goalId: goal.id,
-        person,
-        fecha,
-        monto: monto!,
-        nota: nota || undefined,
-      });
-    }
-    onClose();
-  }
 
   return (
     <Sheet
@@ -365,10 +530,10 @@ function MovimientoSheet({
         <Field label="Fecha">
           <DateInput value={fecha} onChange={setFecha} />
         </Field>
-        {goal.tipo === "grupal" ? (
+        {persons.length > 1 ? (
           <Field label="Bolsa">
             <PillToggle
-              options={goal.bolsas.map((b) => ({ value: b.person, label: b.person }))}
+              options={persons.map((p) => ({ value: p, label: p }))}
               value={person}
               onChange={setPerson}
             />
@@ -389,8 +554,24 @@ function MovimientoSheet({
             <TextInput value={nota} onChange={setNota} placeholder="Motivo del retiro" />
           </Field>
         ) : null}
-        <PrimaryButton onClick={submit} disabled={!valid}>
-          {mode === "deposito" ? "Confirmar depósito" : "Confirmar retiro"}
+        <SheetError text={error} />
+        <PrimaryButton
+          disabled={!valid || enviando || guardando}
+          onClick={() =>
+            void handle({
+              goalId: goal.id,
+              person,
+              fecha,
+              monto: monto!,
+              nota: mode === "retiro" ? nota || undefined : undefined,
+            })
+          }
+        >
+          {enviando
+            ? "Guardando…"
+            : mode === "deposito"
+              ? "Confirmar depósito"
+              : "Confirmar retiro"}
         </PrimaryButton>
       </div>
     </Sheet>
@@ -399,27 +580,26 @@ function MovimientoSheet({
 
 // ── Actualizar variación ─────────────────────────────────────────────────────
 
+type VariacionInput = { goalId: string; fecha: string; variacionTotal: number };
+
 function VariacionSheet({
   goal,
+  guardando,
   onClose,
-  dispatch,
+  onSubmit,
 }: {
   goal: FintualGoal;
+  guardando: boolean;
   onClose: () => void;
-  dispatch: (action: FinanceAction) => void;
+  onSubmit: (input: VariacionInput) => Promise<string | null>;
 }) {
   const [fecha, setFecha] = useState(todayISO());
   const [signo, setSigno] = useState<"pos" | "neg">(goal.variacion >= 0 ? "pos" : "neg");
   const [monto, setMonto] = useState<number | null>(Math.abs(goal.variacion));
+  const { enviando, error, handle } = useSheetSubmit(onSubmit);
 
   const nuevaVariacion = (signo === "pos" ? 1 : -1) * (monto ?? 0);
   const valid = fecha !== "" && monto !== null;
-
-  function submit() {
-    if (!valid) return;
-    dispatch({ type: "fintual/variacion", goalId: goal.id, fecha, nuevaVariacion });
-    onClose();
-  }
 
   return (
     <Sheet open title="Actualizar variación" onClose={onClose}>
@@ -449,8 +629,16 @@ function VariacionSheet({
         >
           <MoneyInput value={monto} onChange={setMonto} />
         </Field>
-        <PrimaryButton onClick={submit} disabled={!valid}>
-          Guardar variación {formatSignedCLP(nuevaVariacion)}
+        <SheetError text={error} />
+        <PrimaryButton
+          disabled={!valid || enviando || guardando}
+          onClick={() =>
+            void handle({ goalId: goal.id, fecha, variacionTotal: nuevaVariacion })
+          }
+        >
+          {enviando
+            ? "Guardando…"
+            : `Guardar variación ${formatSignedCLP(nuevaVariacion)}`}
         </PrimaryButton>
       </div>
     </Sheet>

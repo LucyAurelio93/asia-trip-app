@@ -96,14 +96,20 @@ export type FintualGoalRecord = {
   id: string;
   nombre: string;
   tipo: "grupal" | "personal";
+  // created_at de la base; ausente solo en datos en memoria.
+  createdAt?: string;
 };
 
 export type FintualGoalBag = {
   id: string;
   goalId: string;
   userId: UserId;
+  createdAt?: string;
 };
 
+// createdAt (created_at) desempata eventos de una misma fecha: la capa de
+// datos los pide ordenados por (fecha, created_at, id) y derive.ts conserva
+// ese orden dentro de cada fecha.
 export type FintualEvent =
   | {
       id: string;
@@ -114,6 +120,7 @@ export type FintualEvent =
       monto: number; // CLP, positivo
       nota?: string;
       registradoPorUserId: UserId; // autor del registro (no el dueño de la bolsa)
+      createdAt?: string;
     }
   | {
       id: string;
@@ -124,6 +131,7 @@ export type FintualEvent =
       monto: number; // CLP, positivo
       nota?: string;
       registradoPorUserId: UserId;
+      createdAt?: string;
     }
   | {
       id: string;
@@ -132,6 +140,7 @@ export type FintualEvent =
       tipo: "variacion";
       variacionTotal: number; // variación acumulada declarada a esa fecha
       registradoPorUserId: UserId;
+      createdAt?: string;
     };
 
 // ── Caja ─────────────────────────────────────────────────────────────────────

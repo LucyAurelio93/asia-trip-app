@@ -6,14 +6,15 @@ import {
   allMovements,
   type CajaStatus,
   type FinanceState,
+  type FintualStatus,
   type ModuleId,
 } from "../lib/model";
 import { Card, MovementList, useMockNotice } from "./ui";
 
 // Historial global: todos los movimientos de DAP, Fintual y Caja.
 // Los historiales individuales viven dentro de cada DAP / objetivo Fintual.
-// Mientras Caja (Supabase) no esté lista, el combinado es INCOMPLETO y se
-// advierte de forma explícita: DAP/Fintual mock se muestran igual.
+// Mientras Caja o Fintual (Supabase) no estén listos, el combinado es
+// INCOMPLETO y se advierte de forma explícita: DAP mock se muestra igual.
 
 type Filter = "todos" | ModuleId;
 
@@ -27,12 +28,23 @@ const FILTERS: { value: Filter; label: string }[] = [
 export default function HistorialTab({
   state,
   cajaStatus,
+  fintualStatus,
 }: {
   state: FinanceState;
   cajaStatus: CajaStatus;
+  fintualStatus: FintualStatus;
 }) {
   const [filter, setFilter] = useState<Filter>("todos");
   const [notice, setNotice] = useMockNotice();
+
+  const modulosCargando = [
+    cajaStatus === "cargando" ? "Caja" : null,
+    fintualStatus === "cargando" ? "Fintual" : null,
+  ].filter((m): m is string => m !== null);
+  const modulosConError = [
+    cajaStatus === "error" ? "Caja" : null,
+    fintualStatus === "error" ? "Fintual" : null,
+  ].filter((m): m is string => m !== null);
 
   const movements = allMovements(state).filter(
     (m) => filter === "todos" || m.module === filter
@@ -89,17 +101,17 @@ export default function HistorialTab({
         </p>
       ) : null}
 
-      {cajaStatus === "cargando" ? (
+      {modulosCargando.length > 0 ? (
         <p className="rounded-xl border border-[#1f242b] bg-[#0f1218] px-4 py-3 text-xs text-[#8b929c]">
-          Los movimientos de Caja aún se están cargando: este historial todavía
-          no los incluye.
+          Los movimientos de {modulosCargando.join(" y ")} aún se están
+          cargando: este historial todavía no los incluye.
         </p>
       ) : null}
-      {cajaStatus === "error" ? (
+      {modulosConError.length > 0 ? (
         <p className="rounded-xl border border-[#3a2429] bg-[#1a1216] px-4 py-3 text-xs text-[#f87171]">
-          No se pudieron cargar los movimientos de Caja: este historial está
-          incompleto (solo muestra DAP y Fintual). Reintenta desde la pestaña
-          Caja o Resumen.
+          No se pudieron cargar los movimientos de {modulosConError.join(" y ")}:
+          este historial está incompleto. Reintenta desde la pestaña
+          correspondiente o desde Resumen.
         </p>
       ) : null}
 

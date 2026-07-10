@@ -3,7 +3,7 @@
 import { useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, History, Landmark, LayoutGrid, TrendingUp, Wallet } from "lucide-react";
-import { financeReducer, projectFinanceState, useCaja } from "../lib/model";
+import { financeReducer, projectFinanceState, useCaja, useFintual } from "../lib/model";
 import { initialFinanceStore } from "../lib/mockData";
 import { BackNavProvider, useBackStack } from "./backNav";
 import CajaTab from "./CajaTab";
@@ -23,20 +23,25 @@ const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function FinanzasApp() {
-  // DAP y Fintual siguen sobre el store mock en memoria; Caja se carga desde
-  // Supabase (useCaja) y su proyección reemplaza a la del store, que ya no
-  // trae eventos de caja. Resumen e Historial consumen así Caja real y
-  // DAP/Fintual mock, sin mezclar eventos de ambos orígenes.
+  // Solo DAP sigue sobre el store mock en memoria; Caja (useCaja) y Fintual
+  // (useFintual) se cargan desde Supabase y sus proyecciones reemplazan a las
+  // del store, que ya no trae sus eventos. Resumen e Historial consumen así
+  // Caja y Fintual reales y DAP mock, sin mezclar eventos de ambos orígenes.
   //
-  // Mientras useCaja está "cargando" o en "error", cajaConn.caja es la
-  // proyección vacía (saldo 0, sin movimientos): las tabs agregadas reciben
-  // también cajaConn.status para NO presentar ese vacío como un total o un
-  // historial definitivos.
+  // Mientras useCaja/useFintual están "cargando" o en "error", su proyección
+  // es la vacía (saldo 0 / sin objetivos): las tabs agregadas reciben también
+  // los status para NO presentar ese vacío como un total o un historial
+  // definitivos.
   const [store, dispatch] = useReducer(financeReducer, initialFinanceStore);
   const cajaConn = useCaja();
+  const fintualConn = useFintual();
   const state = useMemo(
-    () => ({ ...projectFinanceState(store), caja: cajaConn.caja }),
-    [store, cajaConn.caja]
+    () => ({
+      ...projectFinanceState(store),
+      caja: cajaConn.caja,
+      fintual: fintualConn.goals,
+    }),
+    [store, cajaConn.caja, fintualConn.goals]
   );
   // Cada tab se remonta al cambiar (key), así los detalles abiertos se cierran
   // al navegar y cada sección parte en su vista raíz.
@@ -81,7 +86,9 @@ export default function FinanzasApp() {
               key="resumen"
               state={state}
               cajaStatus={cajaConn.status}
+              fintualStatus={fintualConn.status}
               onReloadCaja={cajaConn.reload}
+              onReloadFintual={fintualConn.reload}
               onGoTo={setTab}
             />
           ) : null}
@@ -89,11 +96,16 @@ export default function FinanzasApp() {
             <DapTab key="dap" daps={state.daps} dispatch={dispatch} />
           ) : null}
           {tab === "fintual" ? (
-            <FintualTab key="fintual" goals={state.fintual} dispatch={dispatch} />
+            <FintualTab key="fintual" conn={fintualConn} />
           ) : null}
           {tab === "caja" ? <CajaTab key="caja" conn={cajaConn} /> : null}
           {tab === "historial" ? (
-            <HistorialTab key="historial" state={state} cajaStatus={cajaConn.status} />
+            <HistorialTab
+              key="historial"
+              state={state}
+              cajaStatus={cajaConn.status}
+              fintualStatus={fintualConn.status}
+            />
           ) : null}
         </BackNavProvider>
       </div>
